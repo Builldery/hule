@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import Dialog from 'primevue/dialog'
+import { UiModal } from '@buildery/ui-kit/components'
 import TaskView from '@/task/views/TaskView.vue'
 import { useTasksStore } from '@/task/store/useTasksStore'
 import { useListsStore } from '@/list/store/useListsStore'
@@ -147,13 +147,11 @@ watch(visibleTasks, () => {
       @create-task="quickAdd.createTask"
     />
 
-    <Dialog
-      v-model:visible="taskDialogVisible"
-      modal
-      dismissable-mask
-      :show-header="false"
-      :style="{ width: '900px', maxWidth: '95vw' }"
-      :content-style="{ padding: '24px 32px', maxHeight: '85vh', overflowY: 'auto' }"
+    <UiModal
+      :is-open="taskDialogVisible"
+      :is-show-close-cross="true"
+      class="hule-gantt-task-modal"
+      @close="taskDialogVisible = false"
     >
       <TaskView
         v-if="openTaskId"
@@ -162,7 +160,7 @@ watch(visibleTasks, () => {
         :task-id="openTaskId"
         modal
       />
-    </Dialog>
+    </UiModal>
   </div>
 </template>
 
@@ -179,5 +177,17 @@ watch(visibleTasks, () => {
   min-height: 0;
   min-width: 0;
   position: relative;
+}
+</style>
+
+<style>
+/* UiModal teleports to body, so this styling is non-scoped. Matches the
+   PrimeVue Dialog sizing we replaced: 900px wide, 85vh max height, inner
+   padding for TaskView. */
+.hule-gantt-task-modal .modal__container { width: 900px; max-width: 95vw; }
+.hule-gantt-task-modal .modal__content {
+  padding: 24px 32px;
+  max-height: 85vh;
+  overflow-y: auto;
 }
 </style>
