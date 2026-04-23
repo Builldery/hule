@@ -1,14 +1,9 @@
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
-import { db } from '../db.ts'
-import { toDto, toOid } from '../dto.ts'
-import {
-  CreateListDto,
-  UpdateListDto,
-  IdParams,
-  ObjectIdString,
-  ReorderDto,
-} from '../schemas.ts'
+import { db } from '../../db.ts'
+import { toDto, toOid } from '../../shared/dto.ts'
+import { IdParams, ObjectIdString, ReorderDto } from '../../shared/validation.ts'
+import { CreateListDto, UpdateListDto } from './list.schema.ts'
 
 const ListsQuery = z.object({ spaceId: ObjectIdString })
 

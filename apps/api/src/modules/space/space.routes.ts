@@ -1,12 +1,8 @@
 import type { FastifyInstance } from 'fastify'
-import { db } from '../db.ts'
-import { toDto, toOid } from '../dto.ts'
-import {
-  CreateSpaceDto,
-  UpdateSpaceDto,
-  IdParams,
-  ReorderDto,
-} from '../schemas.ts'
+import { db } from '../../db.ts'
+import { toDto, toOid } from '../../shared/dto.ts'
+import { IdParams, ReorderDto } from '../../shared/validation.ts'
+import { CreateSpaceDto, UpdateSpaceDto } from './space.schema.ts'
 
 export async function spacesRoutes(app: FastifyInstance): Promise<void> {
   const col = () => db().collection('spaces')

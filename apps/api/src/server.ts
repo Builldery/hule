@@ -3,11 +3,11 @@ import sensible from '@fastify/sensible'
 import multipart from '@fastify/multipart'
 import { ZodError } from 'zod'
 import { connectDb, closeDb, db } from './db.ts'
-import { spacesRoutes } from './routes/spaces.ts'
-import { listsRoutes } from './routes/lists.ts'
-import { tasksRoutes } from './routes/tasks.ts'
-import { commentsRoutes } from './routes/comments.ts'
-import { filesRoutes } from './routes/files.ts'
+import { spacesRoutes } from './modules/space/space.routes.ts'
+import { listsRoutes } from './modules/list/list.routes.ts'
+import { tasksRoutes } from './modules/task/task.routes.ts'
+import { commentsRoutes } from './modules/comment/comment.routes.ts'
+import { filesRoutes } from './modules/file/file.routes.ts'
 
 const port = Number(process.env.PORT ?? 3000)
 

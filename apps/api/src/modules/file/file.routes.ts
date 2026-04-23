@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify'
-import { toOid } from '../dto.ts'
-import { bucket, db } from '../db.ts'
-import { IdParams } from '../schemas.ts'
+import { toOid } from '../../shared/dto.ts'
+import { bucket, db } from '../../db.ts'
+import { IdParams } from '../../shared/validation.ts'
 
 export async function filesRoutes(app: FastifyInstance): Promise<void> {
   app.get('/api/files/:id', async (req, reply) => {

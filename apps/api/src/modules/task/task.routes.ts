@@ -1,15 +1,15 @@
 import type { FastifyInstance } from 'fastify'
 import { ObjectId } from 'mongodb'
-import { db } from '../db.ts'
-import { toDto, toOid } from '../dto.ts'
+import { db } from '../../db.ts'
+import { toDto, toOid } from '../../shared/dto.ts'
+import { IdParams } from '../../shared/validation.ts'
 import {
   CreateTaskDto,
   UpdateTaskDto,
   MoveTaskDto,
-  IdParams,
   TasksListQuery,
   TimelineQuery,
-} from '../schemas.ts'
+} from './task.schema.ts'
 
 interface TaskDoc {
   _id: ObjectId

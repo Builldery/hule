@@ -1,9 +1,9 @@
 import type { FastifyInstance } from 'fastify'
 import { ObjectId } from 'mongodb'
 import { Readable } from 'node:stream'
-import { db, bucket } from '../db.ts'
-import { toDto, toOid } from '../dto.ts'
-import { IdParams } from '../schemas.ts'
+import { db, bucket } from '../../db.ts'
+import { toDto, toOid } from '../../shared/dto.ts'
+import { IdParams } from '../../shared/validation.ts'
 
 interface CommentDoc {
   _id: ObjectId
