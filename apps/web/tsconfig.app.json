@@ -8,11 +8,6 @@
       "@hule/types/*": ["../../libs/types/src/*"],
       "@hule/utils": ["../../libs/utils/src"],
       "@hule/utils/*": ["../../libs/utils/src/*"],
-      "@buildery/ui-kit": ["../../libs/ui-kit/src"],
-      "@buildery/ui-kit/*": ["../../libs/ui-kit/src/*"],
-      "@buildery/ts-api-kit": ["../../libs/ts-api-kit/src"],
-      "@buildery/event-bus": ["../../libs/event-bus/src"],
-      "@buildery/bp-compiler": ["../../libs/bp-compiler/src"],
       "@/*": ["./src/*"]
     },
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue'
-import Button from 'primevue/button'
+import { UiButton } from '@buildery/ui-kit/components'
 import { useCommentsStore } from '@/comment/store/useCommentsStore'
 import CommentComposer from './CommentComposer.vue'
 
@@ -30,15 +30,16 @@ async function remove(id: string): Promise<void> {
       <header class="head">
         <span class="kind muted">{{ c.kind === 'activity' ? '• activity' : 'Comment' }}</span>
         <span class="muted date">{{ formatDate(c.createdAt) }}</span>
-        <Button
-          icon="pi pi-trash"
-          text
-          severity="secondary"
+        <UiButton
+          fill="text"
+          color="gray"
           size="small"
           class="del"
-          aria-label="Delete comment"
+          title="Delete comment"
           @click="remove(c.id)"
-        />
+        >
+          <i class="pi pi-trash" aria-label="Delete comment" />
+        </UiButton>
       </header>
       <div v-if="c.body" class="body">{{ c.body }}</div>
       <div v-if="c.attachments.length > 0" class="attachments">

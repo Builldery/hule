@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import Button from 'primevue/button'
+import { UiButton } from '@buildery/ui-kit/components'
 import Textarea from 'primevue/textarea'
 import { useDropZone } from '@vueuse/core'
 import { useCommentsStore } from '@/comment/store/useCommentsStore'
@@ -86,9 +86,11 @@ async function submit(): Promise<void> {
     </div>
     <div class="actions">
       <span class="muted hint">Ctrl/Cmd + Enter</span>
-      <Button
+      <UiButton
         label="Comment"
         size="small"
+        color="blue"
+        fill="filled"
         :disabled="submitting || (!body.trim() && files.length === 0)"
         @click="submit"
       />

@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
+import { UiButton, UiInput } from '@buildery/ui-kit/components'
 import Select from 'primevue/select'
 import type { Task } from '@hule/types'
 import { STATUS_OPTIONS, PRIORITY_OPTIONS, statusMeta, priorityMeta } from '@/task/constants/tasks'
@@ -68,12 +67,13 @@ async function remove(): Promise<void> {
       <i v-if="task.status === 'done'" class="pi pi-check"></i>
     </button>
 
-    <InputText
+    <UiInput
       v-if="editing"
-      v-model="titleDraft"
+      :value="titleDraft"
       size="small"
       class="title-input"
       autofocus
+      @update:value="(v: unknown) => titleDraft = String(v ?? '')"
       @keydown.enter="saveTitle"
       @keydown.escape="() => { titleDraft = props.task.title; editing = false }"
       @blur="saveTitle"
@@ -120,10 +120,12 @@ async function remove(): Promise<void> {
       </template>
     </Select>
 
-    <Button icon="pi pi-arrow-up-right" text severity="secondary" size="small"
-      class="del" aria-label="Open task" @click="open" />
-    <Button icon="pi pi-trash" text severity="secondary" size="small"
-      class="del" aria-label="Delete task" @click="remove" />
+    <UiButton fill="text" color="gray" size="small" class="del" title="Open task" @click="open">
+      <i class="pi pi-arrow-up-right" aria-label="Open task" />
+    </UiButton>
+    <UiButton fill="text" color="gray" size="small" class="del" title="Delete task" @click="remove">
+      <i class="pi pi-trash" aria-label="Delete task" />
+    </UiButton>
   </div>
 </template>
 

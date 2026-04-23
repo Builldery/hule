@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
+import { UiButton, UiInput } from '@buildery/ui-kit/components'
 import Textarea from 'primevue/textarea'
 import Select from 'primevue/select'
 import DatePicker from 'primevue/datepicker'
@@ -129,12 +128,15 @@ const dueDateValue = computed({
         <router-link :to="{ name: 'list', params: { spaceId: props.spaceId, listId: props.listId } }">{{ list?.name }}</router-link>
       </div>
       <div class="title-row">
-        <Button v-if="!props.modal" icon="pi pi-arrow-left" text severity="secondary" size="small" @click="back" />
-        <InputText
+        <UiButton v-if="!props.modal" size="small" fill="text" color="gray" title="Back" @click="back">
+          <i class="pi pi-arrow-left" aria-label="Back" />
+        </UiButton>
+        <UiInput
           v-if="editingTitle"
-          v-model="titleDraft"
+          :value="titleDraft"
           class="title-input"
           autofocus
+          @update:value="(v: unknown) => titleDraft = String(v ?? '')"
           @keydown.enter="saveTitle"
           @keydown.escape="() => { titleDraft = task!.title; editingTitle = false }"
           @blur="saveTitle"
@@ -203,11 +205,12 @@ const dueDateValue = computed({
     <section class="section">
       <h2>Subtasks <span class="muted count">({{ subtree.length - 1 }} total)</span></h2>
       <div class="add-subtask">
-        <InputText
-          v-model="newSubtaskTitle"
+        <UiInput
+          :value="newSubtaskTitle"
           placeholder="Add a subtask, press Enter"
           size="small"
           class="add-input"
+          @update:value="(v: unknown) => newSubtaskTitle = String(v ?? '')"
           @keydown.enter="addSubtask"
         />
       </div>

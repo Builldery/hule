@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import InputText from 'primevue/inputtext'
+import { UiInput } from '@buildery/ui-kit/components'
 import { useTasksStore } from '@/task/store/useTasksStore'
 import TaskRow from './TaskRow.vue'
 
@@ -34,11 +34,12 @@ async function createTask(): Promise<void> {
 <template>
   <div class="task-list">
     <div class="add-row">
-      <InputText
-        v-model="newTitle"
+      <UiInput
+        :value="newTitle"
         placeholder="Add a task, press Enter"
         size="small"
         class="add-input"
+        @update:value="(v: unknown) => newTitle = String(v ?? '')"
         @keydown.enter="createTask"
       />
     </div>

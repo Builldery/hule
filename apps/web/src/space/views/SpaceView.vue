@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import Button from 'primevue/button'
+import { UiButton } from '@buildery/ui-kit/components'
 import { useSpacesStore } from '@/space/store/useSpacesStore'
 import { useListsStore } from '@/list/store/useListsStore'
 
@@ -34,13 +34,13 @@ watch(() => props.spaceId, (id) => {
       <div v-if="lists.length === 0" class="muted">No lists in this space yet.</div>
       <ul class="list-grid">
         <li v-for="l in lists" :key="l.id">
-          <Button
-            :label="l.name"
-            text
-            severity="secondary"
-            icon="pi pi-list"
+          <UiButton
+            fill="text"
+            color="gray"
             @click="router.push({ name: 'list', params: { spaceId: props.spaceId, listId: l.id } })"
-          />
+          >
+            <i class="pi pi-list" style="margin-right: 6px" />{{ l.name }}
+          </UiButton>
         </li>
       </ul>
     </section>

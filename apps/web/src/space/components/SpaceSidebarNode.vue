@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
+import { UiButton, UiInput } from '@buildery/ui-kit/components'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import type { Space } from '@hule/types'
@@ -89,19 +88,22 @@ function cancelNewList(): void {
 <template>
   <div class="space-node">
     <div class="space-row">
-      <Button
-        :icon="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+      <UiButton
         size="small"
-        text
-        severity="secondary"
+        fill="text"
+        color="gray"
         class="chev"
+        :title="expanded ? 'Collapse' : 'Expand'"
         @click="expanded = !expanded"
-      />
-      <InputText
+      >
+        <i :class="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" />
+      </UiButton>
+      <UiInput
         v-if="editingName"
-        v-model="nameDraft"
+        :value="nameDraft"
         size="small"
         autofocus
+        @update:value="(v: unknown) => nameDraft = String(v ?? '')"
         @keydown.enter="saveName"
         @keydown.escape="() => { nameDraft = props.space.name; editingName = false }"
         @blur="saveName"
@@ -116,10 +118,14 @@ function cancelNewList(): void {
       </router-link>
 
       <div class="space-actions">
-        <Button icon="pi pi-plus" size="small" text severity="secondary" aria-label="Add list"
-          @click.stop="addingList = true; expanded = true" />
-        <Button icon="pi pi-trash" size="small" text severity="secondary" aria-label="Delete space"
-          @click.stop="confirmDelete" />
+        <UiButton size="small" fill="text" color="gray" title="Add list"
+          @click.stop="addingList = true; expanded = true">
+          <i class="pi pi-plus" aria-label="Add list" />
+        </UiButton>
+        <UiButton size="small" fill="text" color="gray" title="Delete space"
+          @click.stop="confirmDelete">
+          <i class="pi pi-trash" aria-label="Delete space" />
+        </UiButton>
       </div>
     </div>
 
@@ -137,11 +143,12 @@ function cancelNewList(): void {
 
       <div v-if="addingList" class="list-row add-list">
         <i class="pi pi-list muted"></i>
-        <InputText
-          v-model="newListName"
+        <UiInput
+          :value="newListName"
           size="small"
           placeholder="List name"
           autofocus
+          @update:value="(v: unknown) => newListName = String(v ?? '')"
           @keydown.enter="submitNewList"
           @keydown.escape="cancelNewList"
           @blur="submitNewList"

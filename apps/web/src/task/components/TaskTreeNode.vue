@@ -5,8 +5,7 @@ export default { name: 'TaskTreeNode' }
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
+import { UiButton, UiInput } from '@buildery/ui-kit/components'
 import Select from 'primevue/select'
 import type { Task } from '@hule/types'
 import { STATUS_OPTIONS, statusMeta } from '@/task/constants/tasks'
@@ -100,12 +99,13 @@ async function remove(): Promise<void> {
         <i v-if="task.status === 'done'" class="pi pi-check"></i>
       </button>
 
-      <InputText
+      <UiInput
         v-if="editing"
-        v-model="titleDraft"
+        :value="titleDraft"
         size="small"
         class="title-input"
         autofocus
+        @update:value="(v: unknown) => titleDraft = String(v ?? '')"
         @keydown.enter="saveTitle"
         @keydown.escape="() => { titleDraft = props.task.title; editing = false }"
         @blur="saveTitle"
@@ -130,21 +130,25 @@ async function remove(): Promise<void> {
         </template>
       </Select>
 
-      <Button icon="pi pi-plus" size="small" text severity="secondary"
-        class="act" aria-label="Add subtask" @click="addingSubtask = true" />
-      <Button icon="pi pi-arrow-up-right" size="small" text severity="secondary"
-        class="act" aria-label="Open task" @click="open" />
-      <Button icon="pi pi-trash" size="small" text severity="secondary"
-        class="act" aria-label="Delete" @click="remove" />
+      <UiButton size="small" fill="text" color="gray" class="act" title="Add subtask" @click="addingSubtask = true">
+        <i class="pi pi-plus" aria-label="Add subtask" />
+      </UiButton>
+      <UiButton size="small" fill="text" color="gray" class="act" title="Open task" @click="open">
+        <i class="pi pi-arrow-up-right" aria-label="Open task" />
+      </UiButton>
+      <UiButton size="small" fill="text" color="gray" class="act" title="Delete" @click="remove">
+        <i class="pi pi-trash" aria-label="Delete" />
+      </UiButton>
     </div>
 
     <div v-if="expanded" class="children">
       <div v-if="addingSubtask" class="add-child">
-        <InputText
-          v-model="subtaskTitle"
+        <UiInput
+          :value="subtaskTitle"
           placeholder="Subtask title"
           size="small"
           autofocus
+          @update:value="(v: unknown) => subtaskTitle = String(v ?? '')"
           @keydown.enter="addSubtask"
           @keydown.escape="() => { subtaskTitle = ''; addingSubtask = false }"
           @blur="addSubtask"

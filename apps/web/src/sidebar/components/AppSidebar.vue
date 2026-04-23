@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
+import { UiButton, UiInput } from '@buildery/ui-kit/components'
 import { useToast } from 'primevue/usetoast'
 import { useSpacesStore } from '@/space/store/useSpacesStore'
 import SpaceNode from '@/space/components/SpaceSidebarNode.vue'
@@ -37,23 +36,25 @@ function cancel(): void {
   <div class="sidebar">
     <div class="sidebar-head">
       <div class="brand">Hule</div>
-      <Button
+      <UiButton
         v-if="!adding"
-        icon="pi pi-plus"
         size="small"
-        text
-        severity="secondary"
-        aria-label="Add space"
+        fill="text"
+        color="gray"
+        title="Add space"
         @click="adding = true"
-      />
+      >
+        <i class="pi pi-plus" aria-label="Add space" />
+      </UiButton>
     </div>
 
     <div v-if="adding" class="sidebar-input">
-      <InputText
-        v-model="newName"
+      <UiInput
+        :value="newName"
         placeholder="Space name"
         autofocus
         size="small"
+        @update:value="(v: unknown) => newName = String(v ?? '')"
         @keydown.enter="submit"
         @keydown.escape="cancel"
         @blur="submit"

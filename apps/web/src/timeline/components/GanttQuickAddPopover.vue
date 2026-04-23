@@ -2,8 +2,7 @@
 import { ref } from 'vue'
 import Popover from 'primevue/popover'
 import AutoComplete, { type AutoCompleteCompleteEvent, type AutoCompleteOptionSelectEvent } from 'primevue/autocomplete'
-import InputText from 'primevue/inputtext'
-import Button from 'primevue/button'
+import { UiButton, UiInput } from '@buildery/ui-kit/components'
 import type { Task } from '@hule/types'
 
 defineProps<{
@@ -71,18 +70,20 @@ defineExpose({
         />
       </div>
       <div v-else class="qa-body">
-        <InputText
-          :model-value="newTitle"
+        <UiInput
+          :value="newTitle"
           placeholder="Task name"
           size="small"
           autofocus
           class="qa-input"
-          @update:model-value="v => emit('update:newTitle', v ?? '')"
+          @update:value="(v: unknown) => emit('update:newTitle', String(v ?? ''))"
           @keydown.enter="emit('createTask')"
         />
-        <Button
+        <UiButton
           label="Create Task"
           size="small"
+          color="blue"
+          fill="filled"
           :disabled="!newTitle.trim() || creating"
           @click="emit('createTask')"
         />
