@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import SelectButton from 'primevue/selectbutton'
+import {
+  UiButtonGroup,
+  UiRadioGroup,
+  UiRadioButton,
+} from '@buildery/ui-kit/components'
 import { useListsStore } from '@/list/store/useListsStore'
 import { useSpacesStore } from '@/space/store/useSpacesStore'
 import TaskListMode from '@/task/components/TaskListMode.vue'
@@ -35,10 +39,10 @@ const mode = computed<Mode>({
   },
 })
 
-const modes: { label: string; value: Mode; icon: string }[] = [
-  { label: 'List', value: 'list', icon: 'pi pi-list' },
-  { label: 'Kanban', value: 'kanban', icon: 'pi pi-table' },
-  { label: 'Timeline', value: 'timeline', icon: 'pi pi-calendar' },
+const modes: { label: string; value: Mode }[] = [
+  { label: 'List', value: 'list' },
+  { label: 'Kanban', value: 'kanban' },
+  { label: 'Timeline', value: 'timeline' },
 ]
 
 onMounted(() => {
@@ -55,14 +59,17 @@ watch(() => props.spaceId, (id) => {
       <div class="breadcrumb muted">{{ space?.name }} /</div>
       <div class="row spaced">
         <h1>{{ list.name }}</h1>
-        <SelectButton
-          v-model="mode"
-          :options="modes"
-          option-label="label"
-          option-value="value"
-          size="small"
-          :allow-empty="false"
-        />
+        <UiButtonGroup>
+          <UiRadioGroup :value="mode" @update:value="(v: unknown) => mode = parseMode(v)">
+            <UiRadioButton
+              v-for="m in modes"
+              :key="m.value"
+              :value="m.value"
+              :label="m.label"
+              size="small"
+            />
+          </UiRadioGroup>
+        </UiButtonGroup>
       </div>
     </header>
 

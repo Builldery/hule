@@ -49,6 +49,15 @@ html, body, #app {
 
 button { font: inherit; }
 
+/* ui-kit's UiButtonContainer applies `font-family: inherit` to every descendant
+   (`.ui-button-wrapper *`), which clobbers the primeicons font on <i class="pi">
+   nested inside UiButton. Restore the font so pi-icons render as glyphs, not tofu. */
+i.pi,
+i[class^="pi-"],
+i[class*=" pi-"] {
+  font-family: 'primeicons' !important;
+}
+
 .app-layout {
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr;

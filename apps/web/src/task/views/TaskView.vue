@@ -1,14 +1,20 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { UiButton, UiInput } from '@buildery/ui-kit/components'
+import {
+  UiButton,
+  UiInput,
+  UiCombobox,
+  UiListboxOption,
+  UiRawInput,
+  UiTreeView,
+} from '@buildery/ui-kit/components'
 import Textarea from 'primevue/textarea'
-import Select from 'primevue/select'
 import DatePicker from 'primevue/datepicker'
 import { useSpacesStore } from '@/space/store/useSpacesStore'
 import { useListsStore } from '@/list/store/useListsStore'
 import { useTasksStore } from '@/task/store/useTasksStore'
-import { STATUS_OPTIONS, PRIORITY_OPTIONS } from '@/task/constants/tasks'
+import { STATUS_OPTIONS, PRIORITY_OPTIONS, statusMeta, priorityMeta } from '@/task/constants/tasks'
 import TaskTreeNode from '@/task/components/TaskTreeNode.vue'
 import CommentsFeed from '@/comment/components/CommentsFeed.vue'
 
@@ -51,6 +57,10 @@ const descDraft = ref('')
 watch(task, (t) => { if (t) descDraft.value = t.description ?? '' }, { immediate: true })
 
 const newSubtaskTitle = ref('')
+const addingSubtask = ref(false)
+
+const statusLabel = (v: string): string => statusMeta(v).label
+const priorityLabel = (v: string): string => priorityMeta(v).label
 
 onMounted(async () => {
   void spacesStore.load()
@@ -91,10 +101,16 @@ async function onDueDate(d: Date | null): Promise<void> {
 }
 
 async function addSubtask(): Promise<void> {
+  if (addingSubtask.value) return
   const v = newSubtaskTitle.value.trim()
   if (!v) return
-  await tasksStore.create({ listId: props.listId, parentId: props.taskId, title: v })
-  newSubtaskTitle.value = ''
+  addingSubtask.value = true
+  try {
+    await tasksStore.create({ listId: props.listId, parentId: props.taskId, title: v })
+    newSubtaskTitle.value = ''
+  } finally {
+    addingSubtask.value = false
+  }
 }
 
 function back(): void {
@@ -131,16 +147,16 @@ const dueDateValue = computed({
         <UiButton v-if="!props.modal" size="small" fill="text" color="gray" title="Back" @click="back">
           <i class="pi pi-arrow-left" aria-label="Back" />
         </UiButton>
-        <UiInput
-          v-if="editingTitle"
-          :value="titleDraft"
-          class="title-input"
-          autofocus
-          @update:value="(v: unknown) => titleDraft = String(v ?? '')"
-          @keydown.enter="saveTitle"
-          @keydown.escape="() => { titleDraft = task!.title; editingTitle = false }"
-          @blur="saveTitle"
-        />
+        <div v-if="editingTitle" class="title-input">
+          <UiRawInput
+            :value="titleDraft"
+            autofocus
+            @update:value="(v: unknown) => titleDraft = String(v ?? '')"
+            @keydown.enter.stop="saveTitle"
+            @keydown.escape="() => { titleDraft = task!.title; editingTitle = false }"
+            @blur="saveTitle"
+          />
+        </div>
         <h1 v-else @click="editingTitle = true">{{ task.title }}</h1>
       </div>
     </header>
@@ -148,25 +164,39 @@ const dueDateValue = computed({
     <section class="fields">
       <div class="field">
         <label>Status</label>
-        <Select
-          :model-value="task.status"
-          :options="STATUS_OPTIONS"
-          option-label="label"
-          option-value="value"
+        <UiCombobox
+          :value="task.status"
+          :get-display-value="statusLabel"
           size="small"
-          @update:model-value="onStatusChange"
-        />
+          @update:value="onStatusChange"
+        >
+          <UiListboxOption
+            v-for="o in STATUS_OPTIONS"
+            :key="o.value"
+            :value="o.value"
+            :label="o.label"
+          />
+        </UiCombobox>
       </div>
       <div class="field">
         <label>Priority</label>
-        <Select
-          :model-value="task.priority"
-          :options="PRIORITY_OPTIONS"
-          option-label="label"
-          option-value="value"
+        <UiCombobox
+          :value="task.priority"
+          :get-display-value="priorityLabel"
           size="small"
-          @update:model-value="onPriorityChange"
-        />
+          @update:value="onPriorityChange"
+        >
+          <UiListboxOption
+            v-for="o in PRIORITY_OPTIONS"
+            :key="o.value"
+            :value="o.value"
+          >
+            <span class="prio-row">
+              <i class="pi" :class="o.icon" :style="{ color: o.color }"></i>
+              <span>{{ o.label }}</span>
+            </span>
+          </UiListboxOption>
+        </UiCombobox>
       </div>
       <div class="field">
         <label>Start date</label>
@@ -211,16 +241,18 @@ const dueDateValue = computed({
           size="small"
           class="add-input"
           @update:value="(v: unknown) => newSubtaskTitle = String(v ?? '')"
-          @keydown.enter="addSubtask"
+          @keydown.enter.stop="addSubtask"
         />
       </div>
-      <div v-if="children.length === 0" class="muted">No subtasks yet.</div>
-      <TaskTreeNode
-        v-for="c in children"
-        :key="c.id"
-        :task="c"
-        :all="subtree"
-      />
+      <UiTreeView v-if="children.length > 0">
+        <TaskTreeNode
+          v-for="c in children"
+          :key="c.id"
+          :task="c"
+          :all="subtree"
+        />
+      </UiTreeView>
+      <div v-else class="muted">No subtasks yet.</div>
     </section>
 
     <section class="section">
@@ -251,10 +283,29 @@ const dueDateValue = computed({
 .breadcrumb a { color: inherit; text-decoration: none; }
 .breadcrumb a:hover { text-decoration: underline; }
 .title-row { display: flex; align-items: center; gap: 4px; }
-h1 { margin: 0; font-size: 26px; font-weight: 600; cursor: text; flex: 1; }
-h1:hover { background: var(--hover); border-radius: 4px; padding: 0 4px; }
-.title-input { flex: 1; }
-.title-input :deep(.p-inputtext) { font-size: 26px; font-weight: 600; width: 100%; }
+h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 600;
+  cursor: text;
+  flex: 1;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+h1:hover { background: var(--hover); }
+.title-input { flex: 1; display: flex; }
+.title-input :deep(input) {
+  font-size: 26px;
+  font-weight: 600;
+  width: 100%;
+  border: none;
+  outline: none;
+  background: var(--hover);
+  border-radius: 4px;
+  padding: 0 4px;
+  font-family: inherit;
+  color: inherit;
+}
 .fields {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -271,4 +322,5 @@ h2 { font-size: 14px; font-weight: 600; color: var(--text-muted); text-transform
 .add-subtask { margin-bottom: 8px; }
 .add-input { width: 100%; }
 .add-input :deep(.p-inputtext) { width: 100%; }
+.prio-row { display: inline-flex; align-items: center; gap: 6px; }
 </style>

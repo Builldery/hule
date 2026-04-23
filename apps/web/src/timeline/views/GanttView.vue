@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import {
-  UiModal,
   UiPopover,
   UiPopoverTrigger,
   UiPopoverPanel,
 } from '@buildery/ui-kit/components'
-import TaskView from '@/task/views/TaskView.vue'
 import { useTasksStore } from '@/task/store/useTasksStore'
 import { useListsStore } from '@/list/store/useListsStore'
+import { useTaskModal } from '@/app/compose/useTaskModal'
 import type { Task } from '@hule/types'
 
 import GanttToolbar from '../components/GanttToolbar.vue'
@@ -28,13 +27,9 @@ const props = defineProps<{ listId: string }>()
 
 const tasksStore = useTasksStore()
 const listsStore = useListsStore()
+const taskModal = useTaskModal()
 
-const openTaskId = ref<string | null>(null)
 const listSpaceId = computed(() => listsStore.byId[props.listId]?.spaceId ?? '')
-const taskDialogVisible = computed({
-  get: () => openTaskId.value !== null,
-  set: (v: boolean) => { if (!v) openTaskId.value = null },
-})
 
 const visibleTasks = computed<Task[]>(() =>
   tasksStore.getForList(props.listId).filter(t => t.startDate && t.dueDate),
@@ -53,7 +48,9 @@ const visTl = useVisTimeline({
       dueDate: end.toISOString(),
     })
   },
-  onItemClick: (id) => { openTaskId.value = id },
+  onItemClick: (id) => {
+    taskModal.open({ spaceId: listSpaceId.value, listId: props.listId, taskId: id })
+  },
 })
 
 const { viewMode, viewModes, goToday, fitAll } = useGanttViewMode(visTl.timeline)
@@ -123,6 +120,7 @@ watch(visibleTasks, () => {
       <UiPopover
         :is-open="quickAdd.popoverOpen.value"
         direction="below"
+        :close-on-content-click="false"
         @update:is-open="(v: boolean) => (quickAdd.popoverOpen.value = v)"
         @close="onPopoverClose"
       >
@@ -156,20 +154,6 @@ watch(visibleTasks, () => {
       </UiPopover>
     </div>
 
-    <UiModal
-      :is-open="taskDialogVisible"
-      :is-show-close-cross="true"
-      class="hule-gantt-task-modal"
-      @close="taskDialogVisible = false"
-    >
-      <TaskView
-        v-if="openTaskId"
-        :space-id="listSpaceId"
-        :list-id="props.listId"
-        :task-id="openTaskId"
-        modal
-      />
-    </UiModal>
   </div>
 </template>
 
@@ -189,14 +173,3 @@ watch(visibleTasks, () => {
 }
 </style>
 
-<style>
-/* UiModal teleports to body, so this styling is non-scoped. Matches the
-   PrimeVue Dialog sizing we replaced: 900px wide, 85vh max height, inner
-   padding for TaskView. */
-.hule-gantt-task-modal .modal__container { width: 900px; max-width: 95vw; }
-.hule-gantt-task-modal .modal__content {
-  padding: 24px 32px;
-  max-height: 85vh;
-  overflow-y: auto;
-}
-</style>

@@ -1,18 +1,22 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { UiButton, UiInput } from '@buildery/ui-kit/components'
-import Select from 'primevue/select'
+import {
+  UiButton,
+  UiCombobox,
+  UiListboxOption,
+  UiRawInput,
+} from '@buildery/ui-kit/components'
 import type { Task } from '@hule/types'
 import { STATUS_OPTIONS, PRIORITY_OPTIONS, statusMeta, priorityMeta } from '@/task/constants/tasks'
 import { useTasksStore } from '@/task/store/useTasksStore'
 import { useListsStore } from '@/list/store/useListsStore'
+import { useTaskModal } from '@/app/compose/useTaskModal'
 
 const props = defineProps<{ task: Task }>()
 
 const tasksStore = useTasksStore()
 const listsStore = useListsStore()
-const router = useRouter()
+const taskModal = useTaskModal()
 
 const subtaskCount = computed(() =>
   tasksStore.getForList(props.task.listId).filter(t => t.path.includes(props.task.id)).length,
@@ -21,10 +25,7 @@ const subtaskCount = computed(() =>
 function open(): void {
   const list = listsStore.byId[props.task.listId]
   if (!list) return
-  void router.push({
-    name: 'task',
-    params: { spaceId: list.spaceId, listId: list.id, taskId: props.task.id },
-  })
+  taskModal.open({ spaceId: list.spaceId, listId: list.id, taskId: props.task.id })
 }
 
 const editing = ref(false)
@@ -58,6 +59,9 @@ async function toggleDone(): Promise<void> {
 async function remove(): Promise<void> {
   await tasksStore.remove(props.task.id)
 }
+
+const statusLabel = (v: string): string => statusMeta(v).label
+const priorityLabel = (v: string): string => priorityMeta(v).label
 </script>
 
 <template>
@@ -67,17 +71,16 @@ async function remove(): Promise<void> {
       <i v-if="task.status === 'done'" class="pi pi-check"></i>
     </button>
 
-    <UiInput
-      v-if="editing"
-      :value="titleDraft"
-      size="small"
-      class="title-input"
-      autofocus
-      @update:value="(v: unknown) => titleDraft = String(v ?? '')"
-      @keydown.enter="saveTitle"
-      @keydown.escape="() => { titleDraft = props.task.title; editing = false }"
-      @blur="saveTitle"
-    />
+    <div v-if="editing" class="title-input">
+      <UiRawInput
+        :value="titleDraft"
+        autofocus
+        @update:value="(v: unknown) => titleDraft = String(v ?? '')"
+        @keydown.enter.stop="saveTitle"
+        @keydown.escape="() => { titleDraft = props.task.title; editing = false }"
+        @blur="saveTitle"
+      />
+    </div>
     <span v-else class="title" @click="editing = true">
       {{ task.title }}
       <span v-if="subtaskCount > 0" class="subcount muted">
@@ -85,40 +88,40 @@ async function remove(): Promise<void> {
       </span>
     </span>
 
-    <Select
-      :model-value="task.status"
-      :options="STATUS_OPTIONS"
-      option-label="label"
-      option-value="value"
+    <UiCombobox
+      :value="task.status"
+      :get-display-value="statusLabel"
       size="small"
-      class="pill"
-      @update:model-value="onStatusChange"
+      class="status-combo"
+      :style="{ '--status-color': statusMeta(task.status).color }"
+      @update:value="onStatusChange"
     >
-      <template #value="s">
-        <span class="pill-inner" :style="{ background: statusMeta(task.status).color }">
-          {{ s.placeholder ? s.placeholder : statusMeta(task.status).label }}
-        </span>
-      </template>
-    </Select>
+      <UiListboxOption
+        v-for="o in STATUS_OPTIONS"
+        :key="o.value"
+        :value="o.value"
+        :label="o.label"
+      />
+    </UiCombobox>
 
-    <Select
-      :model-value="task.priority"
-      :options="PRIORITY_OPTIONS"
-      option-label="label"
-      option-value="value"
+    <UiCombobox
+      :value="task.priority"
+      :get-display-value="priorityLabel"
       size="small"
-      class="priority"
-      @update:model-value="onPriorityChange"
+      class="priority-combo"
+      @update:value="onPriorityChange"
     >
-      <template #value>
-        <i class="pi" :class="priorityMeta(task.priority).icon"
-           :style="{ color: priorityMeta(task.priority).color, opacity: task.priority === 'none' ? 0.3 : 1 }"></i>
-      </template>
-      <template #option="o">
-        <i class="pi" :class="o.option.icon" :style="{ color: o.option.color }"></i>
-        <span style="margin-left: 6px">{{ o.option.label }}</span>
-      </template>
-    </Select>
+      <UiListboxOption
+        v-for="o in PRIORITY_OPTIONS"
+        :key="o.value"
+        :value="o.value"
+      >
+        <span class="prio-row">
+          <i class="pi" :class="o.icon" :style="{ color: o.color }"></i>
+          <span>{{ o.label }}</span>
+        </span>
+      </UiListboxOption>
+    </UiCombobox>
 
     <UiButton fill="text" color="gray" size="small" class="del" title="Open task" @click="open">
       <i class="pi pi-arrow-up-right" aria-label="Open task" />
@@ -132,7 +135,7 @@ async function remove(): Promise<void> {
 <style scoped>
 .task-row {
   display: grid;
-  grid-template-columns: 24px 1fr 140px 50px 32px 32px;
+  grid-template-columns: 24px 1fr 140px 110px 32px 32px;
   align-items: center;
   gap: 10px;
   padding: 6px 8px;
@@ -157,7 +160,7 @@ async function remove(): Promise<void> {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  border: 1.5px solid var(--p-surface-400, #94a3b8);
+  border: 1.5px solid var(--text-muted);
   background: transparent;
   cursor: pointer;
   display: grid;
@@ -176,16 +179,22 @@ async function remove(): Promise<void> {
   border-radius: 3px;
 }
 .title:hover { background: var(--hover); }
-.title-input :deep(.p-inputtext) { width: 100%; }
-.pill :deep(.p-select-label) { padding: 2px 6px; font-size: 12px; }
-.pill-inner {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 500;
-  color: #fff;
+.title-input { display: flex; }
+.title-input :deep(input) {
+  width: 100%;
+  padding: 2px 4px;
+  border: none;
+  outline: none;
+  background: var(--hover);
+  border-radius: 3px;
+  font: inherit;
+  color: inherit;
 }
-.priority :deep(.p-select-label) { padding: 2px 6px; }
+/* Status/priority combobox: color the border by the selected status so it
+   reads as a pill at a glance without needing a custom trigger slot. */
+.status-combo :deep(.input-wrapper) {
+  border-color: var(--status-color, var(--border));
+}
+.prio-row { display: inline-flex; align-items: center; gap: 6px; }
 .del { opacity: 0; transition: opacity 0.1s; }
 </style>

@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { UiButton, UiInput } from '@buildery/ui-kit/components'
+import {
+  UiButton,
+  UiRawInput,
+  UiTreeView,
+} from '@buildery/ui-kit/components'
 import { useToast } from '@/app/compose/useToast'
 import { useSpacesStore } from '@/space/store/useSpacesStore'
 import SpaceNode from '@/space/components/SpaceSidebarNode.vue'
@@ -10,19 +14,24 @@ const toast = useToast()
 
 const adding = ref(false)
 const newName = ref('')
+const submitting = ref(false)
 
 async function submit(): Promise<void> {
+  if (submitting.value) return
   const name = newName.value.trim()
   if (!name) {
     adding.value = false
     return
   }
+  submitting.value = true
   try {
     await spacesStore.create({ name })
     newName.value = ''
     adding.value = false
   } catch (e) {
     toast.error(`Failed to create space: ${String(e)}`)
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -49,13 +58,12 @@ function cancel(): void {
     </div>
 
     <div v-if="adding" class="sidebar-input">
-      <UiInput
+      <UiRawInput
         :value="newName"
         placeholder="Space name"
         autofocus
-        size="small"
         @update:value="(v: unknown) => newName = String(v ?? '')"
-        @keydown.enter="submit"
+        @keydown.enter.stop="submit"
         @keydown.escape="cancel"
         @blur="submit"
       />
@@ -66,11 +74,13 @@ function cancel(): void {
       No spaces yet
     </div>
 
-    <SpaceNode
-      v-for="space in spacesStore.items"
-      :key="space.id"
-      :space="space"
-    />
+    <UiTreeView v-else>
+      <SpaceNode
+        v-for="space in spacesStore.items"
+        :key="space.id"
+        :space="space"
+      />
+    </UiTreeView>
   </div>
 </template>
 
@@ -89,9 +99,17 @@ function cancel(): void {
 .sidebar-input {
   padding: 4px 12px 8px;
 }
-.sidebar-input :deep(.p-inputtext) {
+.sidebar-input :deep(input) {
   width: 100%;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  outline: none;
+  font: inherit;
+  color: inherit;
+  background: var(--bg);
 }
+.sidebar-input :deep(input:focus) { border-color: var(--accent-primary); }
 .sidebar-empty {
   padding: 8px 16px;
   font-size: 13px;

@@ -1,9 +1,17 @@
 // Point-import from @buildery/common-css-styles (libs/styles-kit).
-// We intentionally SKIP global.scss — its opinionated reset (body background
-// #EDF6F9, Inter font, html/body height, #app sizing) fights with hule's
-// own layout rules in apps/web/src/style.css. Variables, themes, animations
-// and utility classes are what ui-kit components need — global.scss is not.
+//
+// - Variables, themes, and animations come straight from `src/` (they're not
+//   class-prefixed, just CSS custom properties and @keyframes).
+// - Utility classes come from the built `dist/styles.css`, which applies the
+//   `ui--` prefix via gulp-class-prefix. ui-kit components reference the
+//   prefixed names (e.g. `ui-button-wrapper ui--p-horizontal__small-xx`), and
+//   so does our own code via `ui--w-max__900px`, `ui--flex-row`, etc. Without
+//   the prefix pass the selectors don't match and ui-kit layouts collapse to
+//   `display: block`.
+// - `global.scss` is deliberately skipped — its reset (body background
+//   #EDF6F9, Inter font, html/body sizing) fights with hule's own rules in
+//   apps/web/src/style.css.
 @import '../../../../../libs/styles-kit/src/variables/index.css';
 @import '../../../../../libs/styles-kit/src/themes/index.css';
 @import '../../../../../libs/styles-kit/src/animations/index.scss';
-@import '../../../../../libs/styles-kit/src/classes/index.scss';
+@import '../../../../../libs/styles-kit/dist/styles.css';

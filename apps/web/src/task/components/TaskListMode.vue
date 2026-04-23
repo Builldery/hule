@@ -8,6 +8,7 @@ const props = defineProps<{ listId: string }>()
 
 const tasksStore = useTasksStore()
 const newTitle = ref('')
+const creating = ref(false)
 
 const rootTasks = computed(() =>
   tasksStore
@@ -24,10 +25,16 @@ watch(() => props.listId, (id) => {
 })
 
 async function createTask(): Promise<void> {
+  if (creating.value) return
   const title = newTitle.value.trim()
   if (!title) return
-  await tasksStore.create({ listId: props.listId, title })
-  newTitle.value = ''
+  creating.value = true
+  try {
+    await tasksStore.create({ listId: props.listId, title })
+    newTitle.value = ''
+  } finally {
+    creating.value = false
+  }
 }
 </script>
 
@@ -40,7 +47,7 @@ async function createTask(): Promise<void> {
         size="small"
         class="add-input"
         @update:value="(v: unknown) => newTitle = String(v ?? '')"
-        @keydown.enter="createTask"
+        @keydown.enter.stop="createTask"
       />
     </div>
     <div v-if="rootTasks.length === 0" class="muted empty">

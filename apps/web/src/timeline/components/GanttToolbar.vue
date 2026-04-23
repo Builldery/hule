@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import SelectButton from 'primevue/selectbutton'
+import {
+  UiButton,
+  UiButtonGroup,
+  UiRadioGroup,
+  UiRadioButton,
+} from '@buildery/ui-kit/components'
 import type { ViewMode } from '../classes/GanttWindowCalculator'
 
 defineProps<{
@@ -18,15 +23,29 @@ const emit = defineEmits<{
 
 <template>
   <div class="toolbar">
-    <SelectButton
-      :model-value="modelValue"
-      :options="viewModes"
+    <UiButtonGroup>
+      <UiRadioGroup
+        :value="modelValue"
+        @update:value="(v: unknown) => emit('update:modelValue', v as ViewMode)"
+      >
+        <UiRadioButton
+          v-for="m in viewModes"
+          :key="m"
+          :value="m"
+          :label="m"
+          size="small"
+        />
+      </UiRadioGroup>
+    </UiButtonGroup>
+    <UiButton size="small" fill="outlined-tonal" color="gray" label="Today" @click="emit('today')" />
+    <UiButton
       size="small"
-      :allow-empty="false"
-      @update:model-value="v => emit('update:modelValue', v)"
+      fill="outlined-tonal"
+      color="gray"
+      label="Fit all"
+      :disabled="fitDisabled"
+      @click="emit('fit')"
     />
-    <button class="tb-btn" @click="emit('today')">Today</button>
-    <button class="tb-btn" :disabled="fitDisabled" @click="emit('fit')">Fit all</button>
     <span class="tb-spacer" />
     <span v-if="taskCount > 0" class="muted small">
       {{ taskCount }} {{ taskCount === 1 ? 'task' : 'tasks' }}
@@ -46,17 +65,4 @@ const emit = defineEmits<{
 }
 .small { font-size: 12px; }
 .tb-spacer { flex: 1; }
-.tb-btn {
-  border: 1px solid var(--border);
-  background: var(--bg);
-  border-radius: 6px;
-  padding: 5px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text);
-  cursor: pointer;
-  transition: background 0.1s, border-color 0.1s;
-}
-.tb-btn:hover { background: var(--hover); border-color: var(--text-muted); }
-.tb-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>

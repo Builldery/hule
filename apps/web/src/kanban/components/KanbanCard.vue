@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import type { Task } from '@hule/types'
 import { priorityMeta } from '@/task/constants/tasks'
 import { useTasksStore } from '@/task/store/useTasksStore'
 import { useListsStore } from '@/list/store/useListsStore'
+import { useTaskModal } from '@/app/compose/useTaskModal'
 
 const props = defineProps<{ task: Task }>()
 const tasksStore = useTasksStore()
 const listsStore = useListsStore()
-const router = useRouter()
+const taskModal = useTaskModal()
 
 const subtaskCount = computed(() =>
   tasksStore.getForList(props.task.listId).filter(t => t.path.includes(props.task.id)).length,
@@ -33,10 +33,7 @@ function onClick(): void {
   if (dragging.value) return
   const list = listsStore.byId[props.task.listId]
   if (!list) return
-  void router.push({
-    name: 'task',
-    params: { spaceId: list.spaceId, listId: list.id, taskId: props.task.id },
-  })
+  taskModal.open({ spaceId: list.spaceId, listId: list.id, taskId: props.task.id })
 }
 </script>
 

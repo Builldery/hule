@@ -31,8 +31,13 @@ declare module '@buildery/ui-kit/components' {
   export const UiBaseSelectButton: AnyComp
   export const UiCombobox: AnyComp
   export const UiListbox: AnyComp
+  export const UiListboxOption: AnyComp
+  export const UiListboxCustomOption: AnyComp
+  export const UiListboxEmptyOption: AnyComp
   export const UiCheckbox: AnyComp
   export const UiRadio: AnyComp
+  export const UiRadioGroup: AnyComp
+  export const UiRadioButton: AnyComp
   export const UiModal: AnyComp
   export const UiDeleteModal: AnyComp
   export const UiPopover: AnyComp
@@ -44,6 +49,8 @@ declare module '@buildery/ui-kit/components' {
   export const UiCard: AnyComp
   export const UiTabset: AnyComp
   export const UiTab: AnyComp
+  export const UiTreeView: AnyComp
+  export const UiTreeViewItem: AnyComp
 }
 
 declare module '@buildery/ui-kit/compose' {
