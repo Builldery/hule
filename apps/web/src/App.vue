@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import AppSidebar from './components/sidebar/AppSidebar.vue'
-import { useSpacesStore } from './stores/spaces'
+import AppSidebar from '@/sidebar/components/AppSidebar.vue'
+import { useSpacesStore } from '@/space/store/useSpacesStore'
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 

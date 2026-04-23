@@ -4,24 +4,24 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
-    component: () => import('./views/HomeRedirect.vue'),
+    component: () => import('@/app/views/HomeRedirect.vue'),
   },
   {
     path: '/s/:spaceId',
     name: 'space',
-    component: () => import('./views/SpaceView.vue'),
+    component: () => import('@/space/views/SpaceView.vue'),
     props: true,
   },
   {
     path: '/s/:spaceId/l/:listId',
     name: 'list',
-    component: () => import('./views/ListView.vue'),
+    component: () => import('@/list/views/ListView.vue'),
     props: true,
   },
   {
     path: '/s/:spaceId/l/:listId/t/:taskId',
     name: 'task',
-    component: () => import('./views/TaskView.vue'),
+    component: () => import('@/task/views/TaskView.vue'),
     props: true,
   },
 ]
