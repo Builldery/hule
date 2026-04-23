@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { UiButton, UiInput } from '@buildery/ui-kit/components'
-import { useToast } from 'primevue/usetoast'
+import { useToast } from '@/app/compose/useToast'
 import { useSpacesStore } from '@/space/store/useSpacesStore'
 import SpaceNode from '@/space/components/SpaceSidebarNode.vue'
 
@@ -22,7 +22,7 @@ async function submit(): Promise<void> {
     newName.value = ''
     adding.value = false
   } catch (e) {
-    toast.add({ severity: 'error', summary: 'Failed to create space', detail: String(e), life: 4000 })
+    toast.error(`Failed to create space: ${String(e)}`)
   }
 }
 

@@ -3,7 +3,7 @@ import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { UiButton, UiInput } from '@buildery/ui-kit/components'
 import { useConfirm } from 'primevue/useconfirm'
-import { useToast } from 'primevue/usetoast'
+import { useToast } from '@/app/compose/useToast'
 import type { Space } from '@hule/types'
 import { useSpacesStore } from '@/space/store/useSpacesStore'
 import { useListsStore } from '@/list/store/useListsStore'
@@ -40,7 +40,7 @@ async function saveName(): Promise<void> {
     await spacesStore.update(props.space.id, { name: trimmed })
     editingName.value = false
   } catch (e) {
-    toast.add({ severity: 'error', summary: 'Rename failed', detail: String(e), life: 4000 })
+    toast.error(`Rename failed: ${String(e)}`)
   }
 }
 
@@ -57,7 +57,7 @@ function confirmDelete(e: MouseEvent): void {
           await router.push({ name: 'home' })
         }
       } catch (err) {
-        toast.add({ severity: 'error', summary: 'Delete failed', detail: String(err), life: 4000 })
+        toast.error(`Delete failed: ${String(err)}`)
       }
     },
   })
@@ -75,7 +75,7 @@ async function submitNewList(): Promise<void> {
     addingList.value = false
     await router.push({ name: 'list', params: { spaceId: props.space.id, listId: list.id } })
   } catch (e) {
-    toast.add({ severity: 'error', summary: 'Failed to create list', detail: String(e), life: 4000 })
+    toast.error(`Failed to create list: ${String(e)}`)
   }
 }
 
