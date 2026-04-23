@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { UiButton, UiInput } from '@buildery/ui-kit/components'
-import { useConfirm } from 'primevue/useconfirm'
+import { useConfirm } from '@/app/compose/useConfirm'
 import { useToast } from '@/app/compose/useToast'
 import type { Space } from '@hule/types'
 import { useSpacesStore } from '@/space/store/useSpacesStore'
@@ -44,23 +44,20 @@ async function saveName(): Promise<void> {
   }
 }
 
-function confirmDelete(e: MouseEvent): void {
-  confirm.require({
-    target: e.currentTarget as HTMLElement,
-    message: `Delete space "${props.space.name}" and all its lists/tasks?`,
-    icon: 'pi pi-exclamation-triangle',
-    acceptClass: 'p-button-danger',
-    accept: async () => {
-      try {
-        await spacesStore.remove(props.space.id)
-        if (route.params.spaceId === props.space.id) {
-          await router.push({ name: 'home' })
-        }
-      } catch (err) {
-        toast.error(`Delete failed: ${String(err)}`)
-      }
-    },
+async function confirmDelete(): Promise<void> {
+  const ok = await confirm.delete({
+    title: `Delete space "${props.space.name}"?`,
+    description: 'All lists and tasks inside will be permanently removed.',
   })
+  if (!ok) return
+  try {
+    await spacesStore.remove(props.space.id)
+    if (route.params.spaceId === props.space.id) {
+      await router.push({ name: 'home' })
+    }
+  } catch (err) {
+    toast.error(`Delete failed: ${String(err)}`)
+  }
 }
 
 async function submitNewList(): Promise<void> {
