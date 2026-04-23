@@ -1,11 +1,26 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import swc from 'vite-plugin-swc-transform'
 import { getResolvedAliases } from '../../vite.aliases'
 
 const apiTarget = process.env.VITE_API_PROXY ?? 'http://api:3000'
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    // @buildery/ts-api-kit uses legacy (2022-03) TS decorators on CRUD
+    // operation classes. Default esbuild can't transform them, so we route
+    // TS through SWC the same way the upstream builderry app does.
+    swc({
+      swcOptions: {
+        jsc: {
+          parser: { syntax: 'typescript', decorators: true },
+          transform: { decoratorVersion: '2022-03' },
+          target: 'es2022',
+        },
+      },
+    }),
+  ],
   resolve: {
     alias: getResolvedAliases(__dirname),
   },
