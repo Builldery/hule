@@ -1,0 +1,9 @@
+// Point-import from @buildery/common-css-styles (libs/styles-kit).
+// We intentionally SKIP global.scss — its opinionated reset (body background
+// #EDF6F9, Inter font, html/body height, #app sizing) fights with hule's
+// own layout rules in apps/web/src/style.css. Variables, themes, animations
+// and utility classes are what ui-kit components need — global.scss is not.
+@import '../../../../../libs/styles-kit/src/variables/index.css';
+@import '../../../../../libs/styles-kit/src/themes/index.css';
+@import '../../../../../libs/styles-kit/src/animations/index.scss';
+@import '../../../../../libs/styles-kit/src/classes/index.scss';

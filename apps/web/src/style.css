@@ -1,29 +1,32 @@
 :root {
   --sidebar-width: 280px;
   --header-height: 48px;
-  --bg: #ffffff;
-  --bg-muted: #f8fafc;
-  --border: #e2e8f0;
-  --text: #0f172a;
-  --text-muted: #64748b;
-  --hover: #f1f5f9;
-  --active-bg: #e0e7ff;
-  --active-text: #4338ca;
 
-  /* Task palette — softer tones than saturated Tailwind-500.
-     Used for status pills, kanban dots, priority flags, timeline bars. */
-  --status-todo: #94a3b8;
-  --status-in-progress: #6366f1;
-  --status-done: #10b981;
+  /* Semantic tokens — values resolved via ui-kit palette (libs/styles-kit).
+     Names kept stable so existing `var(--bg)` usages across components need no change. */
+  --bg:            rgb(var(--ui--rgb-color__white));
+  --bg-muted:      var(--ui--color__gray--100);
+  --border:        var(--ui--color__gray--500);
+  --text:          var(--ui--color__gray--1400);
+  --text-muted:    var(--ui--color__gray--1000);
+  --hover:         var(--ui--color__gray--300);
+  --active-bg:     rgba(var(--ui--rgb-color__blue--400), 0.12);
+  --active-text:   rgb(var(--ui--rgb-color__blue--500));
 
-  --priority-low: #94a3b8;
-  --priority-normal: #38bdf8;
-  --priority-high: #fb923c;
-  --priority-urgent: #f87171;
+  /* Task status palette. */
+  --status-todo:        var(--ui--color__gray--800);
+  --status-in-progress: rgb(var(--ui--rgb-color__purple--500));
+  --status-done:        rgb(var(--ui--rgb-color__green--400));
 
-  /* Accent for today marker / current-time line. */
-  --accent-today: #ef4444;
-  --accent-primary: #6366f1;
+  /* Priority palette. */
+  --priority-low:    var(--ui--color__gray--800);
+  --priority-normal: rgb(var(--ui--rgb-color__blue--400));
+  --priority-high:   rgb(var(--ui--rgb-color__orange--400));
+  --priority-urgent: rgb(var(--ui--rgb-color__red--400));
+
+  /* Accents. */
+  --accent-today:   rgb(var(--ui--rgb-color__red--400));
+  --accent-primary: rgb(var(--ui--rgb-color__blue--400));
 
   color-scheme: light;
   font: 14px/1.5 system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -41,6 +44,7 @@ html, body, #app {
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  background: var(--bg);
 }
 
 button { font: inherit; }
