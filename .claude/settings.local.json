@@ -1,8 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(find apps/web/src -type f \\\\\\( -name '*.vue.js' -o -name '*.js' \\\\\\) -delete)",
-      "Bash(pnpm --filter @hule/web add vue3-toastify)"
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(docker compose *)",
+      "Bash(pnpm -v)",
+      "Bash(pnpm install *)"
     ]
   }
 }

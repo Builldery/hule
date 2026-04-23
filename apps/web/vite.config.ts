@@ -24,6 +24,15 @@ export default defineConfig({
   resolve: {
     alias: getResolvedAliases(__dirname),
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler',
+        quietDeps: true,
+        silenceDeprecations: ['import', 'global-builtin', 'legacy-js-api'],
+      },
+    },
+  },
   server: {
     host: '0.0.0.0',
     port: 5173,

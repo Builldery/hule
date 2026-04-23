@@ -34,3 +34,4 @@ apps/web/src/**/*.ts.js
 *.njsproj
 *.sln
 *.sw?
+/.pnpm-store/
