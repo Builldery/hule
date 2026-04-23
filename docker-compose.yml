@@ -12,7 +12,8 @@ services:
 
   api:
     build:
-      context: ./apps/api
+      context: .
+      dockerfile: apps/api/Dockerfile
     environment:
       MONGO_URL: mongodb://mongo:27017/hule
       PORT: "3000"
@@ -26,7 +27,8 @@ services:
 
   web:
     build:
-      context: ./apps/web
+      context: .
+      dockerfile: apps/web/Dockerfile
     environment:
       VITE_API_PROXY: http://api:3000
     depends_on:

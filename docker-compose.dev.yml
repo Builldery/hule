@@ -1,14 +1,20 @@
 services:
   api:
     volumes:
-      - ./apps/api:/app
-      - api_node_modules:/app/node_modules
+      - ./:/repo
+      - api_node_modules:/repo/node_modules
+      - api_app_node_modules:/repo/apps/api/node_modules
+    working_dir: /repo/apps/api
 
   web:
     volumes:
-      - ./apps/web:/app
-      - web_node_modules:/app/node_modules
+      - ./:/repo
+      - web_node_modules:/repo/node_modules
+      - web_app_node_modules:/repo/apps/web/node_modules
+    working_dir: /repo/apps/web
 
 volumes:
   api_node_modules:
+  api_app_node_modules:
   web_node_modules:
+  web_app_node_modules:
