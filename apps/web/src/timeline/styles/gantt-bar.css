@@ -108,24 +108,28 @@
   opacity: 1;
 }
 
-/* ── Quick-add ghost bar ─────────────────────────────────────── */
+/* ── Quick-add ghost bar ───────────────────────────────────────
+   The ghost element is now a UiPopoverTrigger wrapper div — the trigger
+   needs pointer-events:auto to receive the click that opens the popover.
+   Default state is hidden; `.is-visible` is toggled from ghost tracking. */
 .hule-ghost {
   position: absolute;
   height: 28px;
   border-radius: 6px;
   background: var(--hover);
   border: 1px dashed var(--text-muted);
-  pointer-events: none;
   z-index: 2;
   transition: opacity 0.1s ease;
   opacity: 0.9;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: flex-end;
   padding-right: 6px;
   color: var(--text-muted);
   font-size: 11px;
+  cursor: pointer;
 }
+.hule-ghost.is-visible { display: flex; }
 .hule-ghost::before {
   content: 'Click to add';
   margin-left: 8px;

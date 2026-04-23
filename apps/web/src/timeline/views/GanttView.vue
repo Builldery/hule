@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { UiModal } from '@buildery/ui-kit/components'
+import {
+  UiModal,
+  UiPopover,
+  UiPopoverTrigger,
+  UiPopoverPanel,
+} from '@buildery/ui-kit/components'
 import TaskView from '@/task/views/TaskView.vue'
 import { useTasksStore } from '@/task/store/useTasksStore'
 import { useListsStore } from '@/list/store/useListsStore'
@@ -36,7 +41,6 @@ const visibleTasks = computed<Task[]>(() =>
 )
 
 const mount = ref<HTMLDivElement | null>(null)
-const popoverRef = ref<InstanceType<typeof GanttQuickAddPopover> | null>(null)
 
 let suppressNextSync = false
 const visTl = useVisTimeline({
@@ -58,7 +62,6 @@ const { install: installTodayMarker } = useTodayMarker(visTl.timeline, mount)
 
 const quickAdd = useGanttQuickAdd({
   listId: computed(() => props.listId),
-  popoverRef,
 })
 
 const ghost = useGanttGhostBar({
@@ -67,14 +70,15 @@ const ghost = useGanttGhostBar({
   popoverOpen: quickAdd.popoverOpen,
 })
 
-function onMountClick(e: MouseEvent): void {
-  const click = ghost.onMountClick(e)
-  if (!click) return
-  quickAdd.open(e, click.day, click.anchor)
+// Capture-phase handler fires before UiPopoverTrigger's internal onClick
+// toggles popoverOpen, so popoverDay is already set when the panel renders.
+function onGhostClickCapture(): void {
+  if (!ghost.ghostDay.value) return
+  quickAdd.prepareOpen(ghost.ghostDay.value)
 }
 
-function onPopoverHide(): void {
-  quickAdd.onHide()
+function onPopoverClose(): void {
+  quickAdd.close()
   ghost.hideGhost()
 }
 
@@ -89,7 +93,6 @@ function rebuildTimeline(): void {
 onMounted(async () => {
   await tasksStore.loadForList(props.listId)
   rebuildTimeline()
-  mount.value?.addEventListener('click', onMountClick)
 })
 
 watch(() => props.listId, async id => {
@@ -117,35 +120,41 @@ watch(visibleTasks, () => {
       No scheduled tasks in this list. Set Start date and Due date on a task to see it here.
     </div>
     <div ref="mount" class="vis-mount">
-      <div
-        v-show="ghost.ghostVisible.value"
-        ref="ghost.ghostEl"
-        class="hule-ghost"
-        :style="{
-          left: ghost.ghostLeft.value + 'px',
-          top: ghost.ghostTop.value + 'px',
-          width: ghost.ghostWidth.value + 'px',
-        }"
-      />
+      <UiPopover
+        :is-open="quickAdd.popoverOpen.value"
+        direction="below"
+        @update:is-open="(v: boolean) => (quickAdd.popoverOpen.value = v)"
+        @close="onPopoverClose"
+      >
+        <UiPopoverTrigger
+          class="hule-ghost"
+          :class="{ 'is-visible': ghost.ghostVisible.value }"
+          :style="{
+            left: ghost.ghostLeft.value + 'px',
+            top: ghost.ghostTop.value + 'px',
+            width: ghost.ghostWidth.value + 'px',
+          }"
+          @click.capture="onGhostClickCapture"
+        />
+        <UiPopoverPanel>
+          <GanttQuickAddPopover
+            :popover-day="quickAdd.popoverDay.value"
+            :active-tab="quickAdd.activeTab.value"
+            :find-query="quickAdd.findQuery.value"
+            :find-suggestions="quickAdd.findSuggestions.value"
+            :new-title="quickAdd.newTitle.value"
+            :creating="quickAdd.creating.value"
+            @update:active-tab="(v: 'find' | 'create') => (quickAdd.activeTab.value = v)"
+            @update:find-query="(v: string) => (quickAdd.findQuery.value = v)"
+            @update:new-title="(v: string) => (quickAdd.newTitle.value = v)"
+            @complete="quickAdd.searchTasks"
+            @find-focus="quickAdd.onFindFocus"
+            @find-select="quickAdd.onFindSelect"
+            @create-task="quickAdd.createTask"
+          />
+        </UiPopoverPanel>
+      </UiPopover>
     </div>
-
-    <GanttQuickAddPopover
-      ref="popoverRef"
-      :popover-day="quickAdd.popoverDay.value"
-      :active-tab="quickAdd.activeTab.value"
-      :find-query="quickAdd.findQuery.value"
-      :find-suggestions="quickAdd.findSuggestions.value"
-      :new-title="quickAdd.newTitle.value"
-      :creating="quickAdd.creating.value"
-      @update:active-tab="v => (quickAdd.activeTab.value = v)"
-      @update:find-query="v => (quickAdd.findQuery.value = v)"
-      @update:new-title="v => (quickAdd.newTitle.value = v)"
-      @hide="onPopoverHide"
-      @complete="quickAdd.searchTasks"
-      @find-focus="quickAdd.onFindFocus"
-      @find-select="quickAdd.onFindSelect"
-      @create-task="quickAdd.createTask"
-    />
 
     <UiModal
       :is-open="taskDialogVisible"

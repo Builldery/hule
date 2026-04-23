@@ -4,14 +4,8 @@ import type { Task } from '@hule/types'
 import { DAY_MS } from '@hule/utils'
 import { useTasksStore } from '@/task/store/useTasksStore'
 
-export interface PopoverHandle {
-  show(e: Event, target?: unknown): void
-  hide(): void
-}
-
 export interface UseGanttQuickAddOptions {
   listId: Ref<string>
-  popoverRef: Ref<PopoverHandle | null>
 }
 
 export interface UseGanttQuickAddReturn {
@@ -22,16 +16,18 @@ export interface UseGanttQuickAddReturn {
   findSuggestions: Ref<Task[]>
   newTitle: Ref<string>
   creating: Ref<boolean>
-  open(e: MouseEvent, day: Date, anchor: HTMLElement | null): void
-  onHide(): void
+  prepareOpen(day: Date): void
+  close(): void
   searchTasks(ev: AutoCompleteCompleteEvent): void
   onFindFocus(): void
   onFindSelect(ev: AutoCompleteOptionSelectEvent): Promise<void>
   createTask(): Promise<void>
 }
 
-/** Quick-add popover: Find (attach an undated task to the ghost day) or
- *  Create (spawn a new task anchored to the ghost day). */
+/** Quick-add popover state: Find (attach an undated task to the ghost day)
+ *  or Create (spawn a new task anchored to the ghost day). Open/close is now
+ *  driven declaratively by UiPopover via `popoverOpen`; `prepareOpen(day)`
+ *  snapshots the day before the trigger click toggles `popoverOpen` on. */
 export function useGanttQuickAdd(opts: UseGanttQuickAddOptions): UseGanttQuickAddReturn {
   const tasksStore = useTasksStore()
   const popoverDay = ref<Date | null>(null)
@@ -59,17 +55,15 @@ export function useGanttQuickAdd(opts: UseGanttQuickAddOptions): UseGanttQuickAd
       : pool.slice(0, 20)
   }
 
-  function open(e: MouseEvent, day: Date, anchor: HTMLElement | null): void {
+  function prepareOpen(day: Date): void {
     popoverDay.value = day
     activeTab.value = 'create'
     findQuery.value = ''
     findSuggestions.value = []
     newTitle.value = ''
-    popoverOpen.value = true
-    queueMicrotask(() => opts.popoverRef.value?.show(e, anchor))
   }
 
-  function onHide(): void {
+  function close(): void {
     popoverOpen.value = false
     popoverDay.value = null
     findQuery.value = ''
@@ -90,7 +84,7 @@ export function useGanttQuickAdd(opts: UseGanttQuickAddOptions): UseGanttQuickAd
     if (!popoverDay.value) return
     const { startISO, endISO } = dayRange(popoverDay.value)
     await tasksStore.update(task.id, { startDate: startISO, dueDate: endISO })
-    opts.popoverRef.value?.hide()
+    close()
   }
 
   async function createTask(): Promise<void> {
@@ -105,7 +99,7 @@ export function useGanttQuickAdd(opts: UseGanttQuickAddOptions): UseGanttQuickAd
         startDate: startISO,
         dueDate: endISO,
       })
-      opts.popoverRef.value?.hide()
+      close()
     } finally {
       creating.value = false
     }
@@ -113,6 +107,6 @@ export function useGanttQuickAdd(opts: UseGanttQuickAddOptions): UseGanttQuickAd
 
   return {
     popoverDay, popoverOpen, activeTab, findQuery, findSuggestions, newTitle, creating,
-    open, onHide, searchTasks, onFindFocus, onFindSelect, createTask,
+    prepareOpen, close, searchTasks, onFindFocus, onFindSelect, createTask,
   }
 }

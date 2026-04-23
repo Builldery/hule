@@ -23,7 +23,6 @@ export interface UseGanttGhostBarReturn {
   ghostEl: Ref<HTMLDivElement | null>
   attach(): void
   detach(): void
-  onMountClick(e: MouseEvent): { day: Date; anchor: HTMLDivElement | null } | null
   hideGhost(): void
 }
 
@@ -106,16 +105,6 @@ export function useGanttGhostBar(opts: UseGanttGhostBarOptions): UseGanttGhostBa
     ghostVisible.value = true
   }
 
-  function onMountClick(e: MouseEvent): { day: Date; anchor: HTMLDivElement | null } | null {
-    if (!ghostVisible.value || !ghostDay.value) return null
-    const target = e.target as HTMLElement | null
-    if (!target) return null
-    if (target.closest('.vis-item')) return null
-    if (target.closest('.vis-time-axis')) return null
-    if (target.closest('.hule-ghost') === null && target.closest('.vis-panel.vis-center') === null) return null
-    return { day: ghostDay.value, anchor: ghostEl.value }
-  }
-
   function attach(): void {
     const mount = opts.mountRef.value
     if (!mount) return
@@ -135,5 +124,5 @@ export function useGanttGhostBar(opts: UseGanttGhostBarOptions): UseGanttGhostBa
 
   onBeforeUnmount(detach)
 
-  return { ghostVisible, ghostLeft, ghostTop, ghostWidth, ghostDay, ghostEl, attach, detach, onMountClick, hideGhost }
+  return { ghostVisible, ghostLeft, ghostTop, ghostWidth, ghostDay, ghostEl, attach, detach, hideGhost }
 }
