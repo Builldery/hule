@@ -1,0 +1,39 @@
+services:
+  mongo:
+    image: mongo:7
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: ./apps/api
+    environment:
+      MONGO_URL: mongodb://mongo:27017/hule
+      PORT: "3000"
+      LOG_LEVEL: info
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - "3100:3000"
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./apps/web
+    environment:
+      VITE_API_PROXY: http://api:3000
+    depends_on:
+      - api
+    ports:
+      - "5173:5173"
+    restart: unless-stopped
+
+volumes:
+  mongo_data:

@@ -1,0 +1,14 @@
+services:
+  api:
+    volumes:
+      - ./apps/api:/app
+      - api_node_modules:/app/node_modules
+
+  web:
+    volumes:
+      - ./apps/web:/app
+      - web_node_modules:/app/node_modules
+
+volumes:
+  api_node_modules:
+  web_node_modules:
