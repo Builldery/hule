@@ -1,0 +1,117 @@
+/* ClickUp-inspired styling for vis-timeline. Non-scoped so selectors target
+   the class names vis-timeline applies to the host and its children. */
+
+.vis-mount .vis-timeline {
+  border: none;
+  font-family: inherit;
+  background: #fff;
+}
+
+/* vis-timeline paints a full-size overlay on init that never tears itself down
+   in our setup and swallows clicks / drags / wheel. */
+.vis-mount .vis-loading-screen {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* ── Axis ─────────────────────────────────────────────────────── */
+.vis-mount .vis-time-axis {
+  background: #fafbfc;
+}
+.vis-mount .vis-time-axis .vis-text {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+  box-sizing: border-box;
+}
+.vis-mount .vis-time-axis .vis-text.vis-major {
+  color: #111827;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+
+/* ── Grid lines ──────────────────────────────────────────────── */
+.vis-mount .vis-panel.vis-center,
+.vis-mount .vis-panel.vis-top,
+.vis-mount .vis-panel.vis-bottom {
+  border-color: #e5e7eb;
+}
+.vis-mount .vis-time-axis .vis-grid.vis-minor {
+  border-color: #cbd5e1;
+}
+.vis-mount .vis-time-axis .vis-grid.vis-major {
+  border-color: #94a3b8;
+}
+
+/* ── Weekend hatching ─────────────────────────────────────────── */
+.vis-mount .vis-time-axis .vis-grid.vis-saturday,
+.vis-mount .vis-time-axis .vis-grid.vis-sunday {
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0 5px,
+    rgba(148, 163, 184, 0.22) 5px 6px
+  );
+}
+
+/* ── Today column highlight ──────────────────────────────────── */
+.vis-mount .vis-time-axis .vis-text.vis-today {
+  color: var(--accent-today);
+  font-weight: 700;
+}
+.vis-mount .vis-time-axis .vis-grid.vis-today {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+/* Custom today marker — red vertical line at noon, bisecting the column. */
+.vis-mount .vis-custom-time.hule-today {
+  background: transparent;
+  width: 2px;
+  z-index: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+.vis-mount .vis-custom-time.hule-today .vis-custom-time-marker {
+  display: none;
+}
+/* vis mounts the custom-time element at the very top of the container
+   (above the axis). `--axis-h` (set by useTodayMarker.syncAxisHeight) lets
+   the visible line + dot cap start just below the axis. */
+.vis-mount .vis-custom-time.hule-today::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--axis-h, 48px) + 8px);
+  left: 0;
+  width: 2px;
+  height: calc(100% - var(--axis-h, 48px) - 8px);
+  background: var(--accent-today);
+  border-radius: 1px;
+}
+.vis-mount .vis-custom-time.hule-today::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--axis-h, 48px) + 3px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-today);
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18);
+}
+
+/* ── Tooltip ─────────────────────────────────────────────────── */
+.vis-tooltip {
+  background: #0f172a !important;
+  color: #f1f5f9 !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 8px 10px !important;
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
+  max-width: 280px;
+}
+.vis-tooltip b { color: #fff; }

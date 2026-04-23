@@ -1,0 +1,134 @@
+/* Bar styling for hule-bar items inside vis-timeline. Non-scoped because
+   vis-timeline owns the DOM — classes are applied via `className` in
+   GanttItemBuilder.toDataItem. */
+
+.vis-mount .vis-item.hule-bar {
+  background: transparent;
+  color: #fff;
+  border: none;
+  padding: 0 15px;
+  box-sizing: border-box;
+  height: 28px !important;
+  line-height: 28px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: none;
+  cursor: pointer;
+  transition: filter 0.12s ease;
+  overflow: hidden;
+  z-index: 1;
+  /* Do NOT set `position` — vis-timeline positions items with transform. */
+}
+
+.vis-mount .vis-item.hule-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 5px;
+  right: 5px;
+  bottom: 0;
+  background: var(--bar-color);
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  transition: box-shadow 0.12s ease;
+  z-index: -1;
+}
+
+.vis-mount .vis-item.hule-bar:hover::before {
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.14);
+}
+.vis-mount .vis-item.hule-bar:hover { filter: brightness(1.04); }
+
+.vis-mount .vis-item.hule-bar.is-done::before { opacity: 0.68; }
+
+.vis-mount .vis-item.vis-selected.hule-bar::before {
+  box-shadow: 0 0 0 2px var(--accent-primary), 0 2px 8px rgba(99, 102, 241, 0.28);
+}
+
+/* Priority stripe — 4px inset on the body pseudo. */
+.vis-mount .vis-item.hule-bar.has-priority::before {
+  box-shadow:
+    inset 4px 0 0 var(--priority-color),
+    0 1px 2px rgba(15, 23, 42, 0.08);
+}
+.vis-mount .vis-item.hule-bar.has-priority:hover::before {
+  box-shadow:
+    inset 4px 0 0 var(--priority-color),
+    0 2px 8px rgba(15, 23, 42, 0.14);
+}
+.vis-mount .vis-item.vis-selected.hule-bar.has-priority::before {
+  box-shadow:
+    inset 4px 0 0 var(--priority-color),
+    0 0 0 2px var(--accent-primary),
+    0 2px 8px rgba(99, 102, 241, 0.28);
+}
+.vis-mount .vis-item.hule-bar.has-priority {
+  padding-left: 19px;  /* 5 gap + 4 stripe + 10 breathing */
+}
+
+/* Content: one-line ellipsis. */
+.vis-mount .vis-item.hule-bar .vis-item-content {
+  padding: 0;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+/* ── Drag handles ─────────────────────────────────────────────── */
+.vis-mount .vis-item.hule-bar .vis-drag-left,
+.vis-mount .vis-item.hule-bar .vis-drag-right {
+  width: 10px;
+  cursor: ew-resize;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.vis-mount .vis-item.hule-bar .vis-drag-left { left: 5px; border-radius: 6px 0 0 6px; }
+.vis-mount .vis-item.hule-bar .vis-drag-right { right: 5px; border-radius: 0 6px 6px 0; }
+
+.vis-mount .vis-item.hule-bar .vis-drag-left::after,
+.vis-mount .vis-item.hule-bar .vis-drag-right::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 14px;
+  background: #fff;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.25);
+}
+
+.vis-mount .vis-item.hule-bar:hover .vis-drag-left,
+.vis-mount .vis-item.hule-bar:hover .vis-drag-right,
+.vis-mount .vis-item.vis-selected.hule-bar .vis-drag-left,
+.vis-mount .vis-item.vis-selected.hule-bar .vis-drag-right {
+  opacity: 1;
+}
+
+/* ── Quick-add ghost bar ─────────────────────────────────────── */
+.hule-ghost {
+  position: absolute;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--hover);
+  border: 1px dashed var(--text-muted);
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.1s ease;
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 6px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.hule-ghost::before {
+  content: 'Click to add';
+  margin-left: 8px;
+  margin-right: auto;
+  font-weight: 500;
+}
