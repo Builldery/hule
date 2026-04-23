@@ -1,5 +1,5 @@
 import type { ITasksRepo, CreateTaskDto, UpdateTaskDto, MoveTaskDto } from '../IRepo'
-import type { Task } from '../../types'
+import type { Task } from '@hule/types'
 import { http } from './client'
 
 function qs(params: Record<string, string | boolean | undefined>): string {

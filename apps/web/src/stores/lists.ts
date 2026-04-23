@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import type { List, CreateListDto, UpdateListDto, ReorderItem } from '../data/types'
+import type { List, CreateListDto, UpdateListDto, ReorderItem } from '@hule/types'
 import { repo } from '../data/repo'
 
 export const useListsStore = defineStore('lists', () => {

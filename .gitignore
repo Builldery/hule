@@ -11,9 +11,18 @@ node_modules
 **/node_modules
 dist
 dist-ssr
+.tsbuildinfo
+**/*.tsbuildinfo
+apps/*/dist
+libs/*/dist
 *.local
 .env
 .env.local
+
+# Stale TS compiler output (should never be committed)
+apps/web/src/**/*.vue.js
+apps/web/src/**/*.vue.d.ts
+apps/web/src/**/*.ts.js
 
 # Editor directories and files
 .vscode/*

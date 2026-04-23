@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import type { Space, CreateSpaceDto, UpdateSpaceDto, ReorderItem } from '../data/types'
+import type { Space, CreateSpaceDto, UpdateSpaceDto, ReorderItem } from '@hule/types'
 import { repo } from '../data/repo'
 
 export const useSpacesStore = defineStore('spaces', () => {

@@ -1,5 +1,5 @@
 import type { ISpacesRepo } from '../IRepo'
-import type { Space, ReorderItem, CreateSpaceDto, UpdateSpaceDto } from '../../types'
+import type { Space, ReorderItem, CreateSpaceDto, UpdateSpaceDto } from '@hule/types'
 import { http } from './client'
 
 export const spacesHttpRepo: ISpacesRepo = {

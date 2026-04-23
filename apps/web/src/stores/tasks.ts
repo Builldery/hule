@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import type { Task } from '../data/types'
+import type { Task } from '@hule/types'
 import type { CreateTaskDto, UpdateTaskDto, MoveTaskDto } from '../data/repo/IRepo'
 import { repo } from '../data/repo'
 

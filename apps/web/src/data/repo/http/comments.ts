@@ -1,5 +1,5 @@
 import type { ICommentsRepo } from '../IRepo'
-import type { Comment } from '../../types'
+import type { Comment } from '@hule/types'
 import { http } from './client'
 
 export const commentsHttpRepo: ICommentsRepo = {

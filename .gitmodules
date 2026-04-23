@@ -1,0 +1,15 @@
+[submodule "libs/ui-kit"]
+	path = libs/ui-kit
+	url = https://github.com/Builldery/client.ui-kit.git
+[submodule "libs/styles-kit"]
+	path = libs/styles-kit
+	url = https://github.com/Builldery/client.lib.common-css-styles.git
+[submodule "libs/event-bus"]
+	path = libs/event-bus
+	url = https://github.com/Builldery/client.lib.event-bus.git
+[submodule "libs/ts-api-kit"]
+	path = libs/ts-api-kit
+	url = https://github.com/Builldery/client.lib.ts-api-kit.git
+[submodule "libs/bp-compiler"]
+	path = libs/bp-compiler
+	url = https://github.com/Builldery/lib.bp-compiler.git

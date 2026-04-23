@@ -1,7 +1,7 @@
 import type {
   Space, List, Task, Comment,
   CreateSpaceDto, UpdateSpaceDto, CreateListDto, UpdateListDto, ReorderItem,
-} from '../types'
+} from '@hule/types'
 
 export interface CreateTaskDto {
   listId: string

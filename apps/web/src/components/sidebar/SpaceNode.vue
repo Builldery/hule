@@ -5,7 +5,7 @@ import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
-import type { Space } from '../../data/types'
+import type { Space } from '@hule/types'
 import { useSpacesStore } from '../../stores/spaces'
 import { useListsStore } from '../../stores/lists'
 

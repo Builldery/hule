@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { Comment } from '../data/types'
+import type { Comment } from '@hule/types'
 import { repo } from '../data/repo'
 
 export const useCommentsStore = defineStore('comments', () => {

@@ -1,5 +1,5 @@
 import type { IListsRepo } from '../IRepo'
-import type { List, ReorderItem, CreateListDto, UpdateListDto } from '../../types'
+import type { List, ReorderItem, CreateListDto, UpdateListDto } from '@hule/types'
 import { http } from './client'
 
 export const listsHttpRepo: IListsRepo = {

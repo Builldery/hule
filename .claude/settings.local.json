@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find apps/web/src -type f \\\\\\( -name '*.vue.js' -o -name '*.js' \\\\\\) -delete)"
+    ]
+  }
+}

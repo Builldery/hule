@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { VueDraggable } from 'vue-draggable-plus'
-import type { Task } from '../../data/types'
+import type { Task } from '@hule/types'
 import type { StatusOption } from '../../constants/tasks'
 import { useTasksStore } from '../../stores/tasks'
 import KanbanCard from './KanbanCard.vue'

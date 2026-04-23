@@ -15,7 +15,13 @@
     "moduleDetection": "force",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@hule/types": ["../../libs/types/src"],
+      "@hule/types/*": ["../../libs/types/src/*"],
+      "@hule/utils": ["../../libs/utils/src"],
+      "@hule/utils/*": ["../../libs/utils/src/*"]
+    }
   },
   "include": ["src/**/*.ts"]
 }

@@ -6,6 +6,7 @@ import ConfirmationService from 'primevue/confirmationservice'
 import ToastService from 'primevue/toastservice'
 
 import 'primeicons/primeicons.css'
+import '@buildery/common-css-styles'
 import './style.css'
 
 import App from './App.vue'

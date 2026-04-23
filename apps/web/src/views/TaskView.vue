@@ -13,7 +13,14 @@ import { STATUS_OPTIONS, PRIORITY_OPTIONS } from '../constants/tasks'
 import TaskTreeNode from '../components/task/TaskTreeNode.vue'
 import CommentsFeed from '../components/comments/CommentsFeed.vue'
 
-const props = defineProps<{ spaceId: string; listId: string; taskId: string }>()
+const props = defineProps<{
+  spaceId: string
+  listId: string
+  taskId: string
+  /** When rendered inside a modal, hide breadcrumbs / back button and relax
+   *  the full-page layout rules (no forced 100% height, no top padding). */
+  modal?: boolean
+}>()
 
 const spacesStore = useSpacesStore()
 const listsStore = useListsStore()
@@ -114,15 +121,15 @@ const dueDateValue = computed({
 </script>
 
 <template>
-  <div v-if="task" class="task-view">
+  <div v-if="task" class="task-view" :class="{ modal: props.modal }">
     <header class="head">
-      <div class="breadcrumb muted">
+      <div v-if="!props.modal" class="breadcrumb muted">
         <router-link :to="{ name: 'space', params: { spaceId: props.spaceId } }">{{ space?.name }}</router-link>
         /
         <router-link :to="{ name: 'list', params: { spaceId: props.spaceId, listId: props.listId } }">{{ list?.name }}</router-link>
       </div>
       <div class="title-row">
-        <Button icon="pi pi-arrow-left" text severity="secondary" size="small" @click="back" />
+        <Button v-if="!props.modal" icon="pi pi-arrow-left" text severity="secondary" size="small" @click="back" />
         <InputText
           v-if="editingTitle"
           v-model="titleDraft"
@@ -228,6 +235,14 @@ const dueDateValue = computed({
   height: 100%;
   overflow-y: auto;
   box-sizing: border-box;
+}
+/* In-modal: the Dialog provides its own padding/scroll, and we don't want
+   the 100% height fight with the dialog's content wrapper. */
+.task-view.modal {
+  padding: 0;
+  height: auto;
+  overflow-y: visible;
+  max-width: none;
 }
 .breadcrumb { font-size: 13px; margin-bottom: 4px; }
 .breadcrumb a { color: inherit; text-decoration: none; }

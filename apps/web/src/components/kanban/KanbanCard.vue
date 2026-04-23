@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import type { Task } from '../../data/types'
+import type { Task } from '@hule/types'
 import { priorityMeta } from '../../constants/tasks'
 import { useTasksStore } from '../../stores/tasks'
 import { useListsStore } from '../../stores/lists'

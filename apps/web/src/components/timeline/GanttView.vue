@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, ref, watch, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
 import { Timeline, DataSet, type TimelineOptions, type DataItem } from 'vis-timeline/standalone'
 import 'vis-timeline/styles/vis-timeline-graph2d.css'
 
@@ -9,9 +8,11 @@ import Popover from 'primevue/popover'
 import AutoComplete, { type AutoCompleteCompleteEvent, type AutoCompleteOptionSelectEvent } from 'primevue/autocomplete'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import TaskView from '../../views/TaskView.vue'
 import { useTasksStore } from '../../stores/tasks'
 import { useListsStore } from '../../stores/lists'
-import type { Task } from '../../data/types'
+import type { Task } from '@hule/types'
 import { priorityMeta, statusMeta } from '../../constants/tasks'
 
 type ViewMode = 'Week' | 'Month' | 'Quarter' | 'Year'
@@ -28,7 +29,13 @@ const props = defineProps<{ listId: string }>()
 
 const tasksStore = useTasksStore()
 const listsStore = useListsStore()
-const router = useRouter()
+
+const openTaskId = ref<string | null>(null)
+const listSpaceId = computed(() => listsStore.byId[props.listId]?.spaceId ?? '')
+const taskDialogVisible = computed({
+  get: () => openTaskId.value !== null,
+  set: (v: boolean) => { if (!v) openTaskId.value = null },
+})
 
 const viewMode = ref<ViewMode>('Week')
 const viewModes: ViewMode[] = ['Week', 'Month', 'Quarter', 'Year']
@@ -235,12 +242,7 @@ function create(): void {
     }
     if (ev.item == null) return
     if (ev.what !== 'item') return
-    const list = listsStore.byId[props.listId]
-    if (!list) return
-    void router.push({
-      name: 'task',
-      params: { spaceId: list.spaceId, listId: props.listId, taskId: String(ev.item) },
-    })
+    openTaskId.value = String(ev.item)
   })
 
   requestAnimationFrame(() => { timeline?.redraw() })
@@ -350,7 +352,13 @@ function onMouseMove(e: MouseEvent): void {
 
   // Snap ghostTop to the item row grid (row 0 top = AXIS_VMARGIN, stride = ROW_STRIDE).
   const cursorPanelY = e.clientY - cRect.top
-  let slot = Math.max(0, Math.floor((cursorPanelY - AXIS_VMARGIN) / ROW_STRIDE))
+  const offsetFromAxis = cursorPanelY - AXIS_VMARGIN
+  let slot = Math.max(0, Math.floor(offsetFromAxis / ROW_STRIDE))
+  // Hide the ghost when the cursor is in the inter-row margin (the 10px gap
+  // between stacked bars) — otherwise `floor` would map the cursor to the
+  // previous slot and the ghost would drift onto it.
+  const offsetWithinSlot = offsetFromAxis - slot * ROW_STRIDE
+  if (offsetFromAxis < 0 || offsetWithinSlot >= GHOST_HEIGHT) return hideGhost()
   const maxSlot = Math.max(0, Math.floor((cRect.height - AXIS_VMARGIN - GHOST_HEIGHT) / ROW_STRIDE))
 
   // Walk down to the first unoccupied slot so the ghost never lands on top
@@ -363,15 +371,21 @@ function onMouseMove(e: MouseEvent): void {
   const slotPanelTop = AXIS_VMARGIN + slot * ROW_STRIDE
   const maxSlotTop = cRect.height - GHOST_HEIGHT - 4
 
-  ghostLeft.value = dayLeftMount
-  ghostWidth.value = dayWidth
+  // Match the 5px inset used by .hule-bar::before so the ghost aligns
+  // pixel-for-pixel with real items instead of spanning the full day column.
+  ghostLeft.value = dayLeftMount + 5
+  ghostWidth.value = dayWidth - 10
   ghostTop.value = cRect.top - mRect.top + Math.min(maxSlotTop, slotPanelTop)
   ghostDay.value = day
   ghostVisible.value = true
 }
 
 /** True if any `.hule-bar` whose X-range overlaps the given day column
- *  already occupies the given row slot (same Y band). */
+ *  already occupies the given row slot (same Y band). A 2px tolerance on
+ *  the horizontal bounds absorbs the subpixel drift between the computed
+ *  day edge (derived from the timeline window) and the DOM positions of
+ *  bars — otherwise a bar ending at exactly the next day's start can leak
+ *  into that day's occupancy check and push the ghost too far down. */
 function slotOccupied(
   bars: NodeListOf<HTMLElement>,
   cRect: DOMRect,
@@ -379,11 +393,12 @@ function slotOccupied(
   dayRightVp: number,
   slot: number,
 ): boolean {
+  const EPS = 2
   const slotTop = cRect.top + AXIS_VMARGIN + slot * ROW_STRIDE
   const slotBottom = slotTop + GHOST_HEIGHT
   for (const bar of bars) {
     const br = bar.getBoundingClientRect()
-    if (br.right <= dayLeftVp || br.left >= dayRightVp) continue
+    if (br.right <= dayLeftVp + EPS || br.left >= dayRightVp - EPS) continue
     if (br.bottom <= slotTop || br.top >= slotBottom) continue
     return true
   }
@@ -613,6 +628,23 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </Popover>
+
+    <Dialog
+      v-model:visible="taskDialogVisible"
+      modal
+      dismissable-mask
+      :show-header="false"
+      :style="{ width: '900px', maxWidth: '95vw' }"
+      :content-style="{ padding: '24px 32px', maxHeight: '85vh', overflowY: 'auto' }"
+    >
+      <TaskView
+        v-if="openTaskId"
+        :space-id="listSpaceId"
+        :list-id="props.listId"
+        :task-id="openTaskId"
+        modal
+      />
+    </Dialog>
   </div>
 </template>
 
@@ -850,6 +882,7 @@ onBeforeUnmount(() => {
   font-size: 13px;
   font-weight: 500;
   box-shadow: none;
+  cursor: pointer;
   transition: filter 0.12s ease;
   overflow: hidden;
   z-index: 1;
