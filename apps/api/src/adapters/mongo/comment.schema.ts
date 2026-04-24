@@ -3,8 +3,14 @@ import mongoose, { Document } from 'mongoose';
 
 @Schema({ _id: false })
 export class CommentAttachment {
-  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId })
-  fileId: mongoose.Types.ObjectId;
+  @Prop({ type: mongoose.Schema.Types.ObjectId })
+  fileId?: mongoose.Types.ObjectId;
+
+  @Prop({ type: String, enum: ['gridfs', 'r2'] })
+  storage?: 'gridfs' | 'r2';
+
+  @Prop({ type: String })
+  storageKey?: string;
 
   @Prop({ required: true }) filename: string;
   @Prop({ required: true }) mime: string;

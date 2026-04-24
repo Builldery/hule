@@ -17,6 +17,11 @@ COPY apps/api/package.json ./apps/api/package.json
 RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile
 
+# Build @buildery/common-css-styles → libs/styles-kit/dist/styles.css.
+# buildery-tokens.scss imports this file directly; submodule keeps `dist/` in
+# .gitignore, so we can't rely on it being present in the build context.
+RUN pnpm --filter @buildery/common-css-styles run build
+
 COPY apps/web ./apps/web
 COPY tsconfig.base.json tsconfig.json vite.aliases.ts ./
 
