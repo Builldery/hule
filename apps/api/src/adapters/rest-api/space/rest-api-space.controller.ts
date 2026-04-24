@@ -10,49 +10,62 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SpaceService } from '../../../domain/modules/space/space.service';
 import { SpaceDto } from '../../../domain/entity/space/space.dto';
 import { CreateSpaceDto } from '../../../domain/entity/space/create-space.dto';
 import { UpdateSpaceDto } from '../../../domain/entity/space/update-space.dto';
 import { IdParamsDto } from '../../../domain/entity/common/id-params.dto';
 import { ReorderItemDto } from '../../../domain/entity/common/reorder.dto';
+import { CurrentWorkspaceId } from '../decorators/current-workspace-id.decorator';
 
 @ApiTags('Space')
-@Controller('spaces')
+@ApiBearerAuth()
+@Controller('workspaces/:workspaceId/spaces')
 export class RestApiSpaceController {
   @Inject() spaceService: SpaceService;
 
   @ApiResponse({ type: [SpaceDto] })
   @Get()
-  getAll(): Promise<Array<SpaceDto>> {
-    return this.spaceService.getAll();
+  getAll(@CurrentWorkspaceId() wsId: string): Promise<Array<SpaceDto>> {
+    return this.spaceService.getAll(wsId);
   }
 
   @ApiResponse({ type: SpaceDto })
   @Post()
-  create(@Body() dto: CreateSpaceDto): Promise<SpaceDto> {
-    return this.spaceService.create(dto);
+  create(
+    @CurrentWorkspaceId() wsId: string,
+    @Body() dto: CreateSpaceDto,
+  ): Promise<SpaceDto> {
+    return this.spaceService.create(wsId, dto);
   }
 
   @ApiResponse({ type: SpaceDto })
   @Patch(':id')
-  update(@Param() params: IdParamsDto, @Body() patch: UpdateSpaceDto): Promise<SpaceDto> {
-    return this.spaceService.update(params.id, patch);
+  update(
+    @CurrentWorkspaceId() wsId: string,
+    @Param() params: IdParamsDto,
+    @Body() patch: UpdateSpaceDto,
+  ): Promise<SpaceDto> {
+    return this.spaceService.update(wsId, params.id, patch);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  async delete(@Param() params: IdParamsDto): Promise<void> {
-    await this.spaceService.delete(params.id);
+  async delete(
+    @CurrentWorkspaceId() wsId: string,
+    @Param() params: IdParamsDto,
+  ): Promise<void> {
+    await this.spaceService.delete(wsId, params.id);
   }
 
   @Post('reorder')
   @HttpCode(204)
   async reorder(
+    @CurrentWorkspaceId() wsId: string,
     @Body(new ParseArrayPipe({ items: ReorderItemDto, whitelist: true }))
     items: Array<ReorderItemDto>,
   ): Promise<void> {
-    await this.spaceService.reorder(items);
+    await this.spaceService.reorder(wsId, items);
   }
 }

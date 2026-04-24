@@ -19,6 +19,9 @@ export const CommentAttachmentSchema =
   timestamps: { createdAt: true, updatedAt: false },
 })
 export class Comment {
+  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'Workspace' })
+  workspaceId: mongoose.Types.ObjectId;
+
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'Task' })
   taskId: mongoose.Types.ObjectId;
 
@@ -38,3 +41,4 @@ export type CommentDocument = Comment & Document;
 export const CommentSchema = SchemaFactory.createForClass(Comment);
 
 CommentSchema.index({ taskId: 1, createdAt: 1 });
+CommentSchema.index({ workspaceId: 1 });

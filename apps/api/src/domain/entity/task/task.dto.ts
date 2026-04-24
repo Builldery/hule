@@ -14,6 +14,7 @@ export class TaskDto {
   @ApiProperty() order: number;
   @ApiProperty() depth: number;
   @ApiProperty({ type: [String] }) path: Array<string>;
+  @ApiProperty({ nullable: true }) assigneeId: string | null;
   @ApiProperty() createdAt: string;
   @ApiProperty() updatedAt: string;
 
@@ -30,6 +31,7 @@ export class TaskDto {
     this.order = raw?.order ?? 0;
     this.depth = raw?.depth ?? 0;
     this.path = Array.isArray(raw?.path) ? raw.path.map((p: any) => p.toString()) : [];
+    this.assigneeId = raw?.assigneeId ? raw.assigneeId.toString() : null;
     this.createdAt = raw?.createdAt instanceof Date ? raw.createdAt.toISOString() : raw?.createdAt;
     this.updatedAt = raw?.updatedAt instanceof Date ? raw.updatedAt.toISOString() : raw?.updatedAt;
   }

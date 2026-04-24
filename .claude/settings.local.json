@@ -5,7 +5,12 @@
       "Bash(npm run *)",
       "Bash(docker compose *)",
       "Bash(pnpm -v)",
-      "Bash(pnpm install *)"
+      "Bash(pnpm install *)",
+      "WebFetch(domain:docs.nestjs.com)",
+      "Bash(pnpm add *)",
+      "Bash(pnpm build *)",
+      "Bash(pnpm --filter api build)",
+      "Bash(pnpm --filter api exec tsc --noEmit)"
     ]
   }
 }

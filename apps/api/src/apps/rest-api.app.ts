@@ -78,6 +78,7 @@ export class RestApiApp {
       .setTitle('Hule API')
       .setDescription('Personal ClickUp alternative — REST API')
       .setVersion('1.0')
+      .addBearerAuth()
       .build();
     const document = SwaggerModule.createDocument(this.app, config);
     SwaggerModule.setup(`${this.BASE_PATH}/documentation`, this.app, document);

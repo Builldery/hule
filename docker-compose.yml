@@ -18,6 +18,8 @@ services:
       MONGO_URL: mongodb://mongo:27017/hule
       PORT: "3000"
       LOG_LEVEL: info
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-30d}
     depends_on:
       mongo:
         condition: service_healthy

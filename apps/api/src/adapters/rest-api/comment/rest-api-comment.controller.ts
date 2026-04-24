@@ -8,32 +8,44 @@ import {
   Post,
   Req,
 } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { FastifyRequest } from 'fastify';
 import { CommentService } from '../../../domain/modules/comment/comment.service';
 import { CommentDto } from '../../../domain/entity/comment/comment.dto';
 import { IdParamsDto } from '../../../domain/entity/common/id-params.dto';
+import { CurrentWorkspaceId } from '../decorators/current-workspace-id.decorator';
 
 @ApiTags('Comment')
-@Controller()
+@ApiBearerAuth()
+@Controller('workspaces/:workspaceId')
 export class RestApiCommentController {
   @Inject() commentService: CommentService;
 
   @ApiResponse({ type: [CommentDto] })
   @Get('tasks/:id/comments')
-  getByTask(@Param() params: IdParamsDto): Promise<Array<CommentDto>> {
-    return this.commentService.getByTaskId(params.id);
+  getByTask(
+    @CurrentWorkspaceId() wsId: string,
+    @Param() params: IdParamsDto,
+  ): Promise<Array<CommentDto>> {
+    return this.commentService.getByTaskId(wsId, params.id);
   }
 
   @ApiResponse({ type: CommentDto })
   @Post('tasks/:id/comments')
-  create(@Param() params: IdParamsDto, @Req() req: FastifyRequest): Promise<CommentDto> {
-    return this.commentService.createForTask(params.id, req);
+  create(
+    @CurrentWorkspaceId() wsId: string,
+    @Param() params: IdParamsDto,
+    @Req() req: FastifyRequest,
+  ): Promise<CommentDto> {
+    return this.commentService.createForTask(wsId, params.id, req);
   }
 
   @Delete('comments/:id')
   @HttpCode(204)
-  async delete(@Param() params: IdParamsDto): Promise<void> {
-    await this.commentService.delete(params.id);
+  async delete(
+    @CurrentWorkspaceId() wsId: string,
+    @Param() params: IdParamsDto,
+  ): Promise<void> {
+    await this.commentService.delete(wsId, params.id);
   }
 }

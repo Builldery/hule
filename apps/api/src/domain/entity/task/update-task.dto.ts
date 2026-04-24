@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsDateString,
   IsEnum,
+  IsMongoId,
   IsOptional,
   IsString,
   MaxLength,
@@ -38,4 +39,10 @@ export class UpdateTaskDto {
   @ValidateIf((_o, v) => v !== null && v !== undefined)
   @IsDateString()
   dueDate?: string | null;
+
+  @ApiProperty({ required: false, nullable: true })
+  @IsOptional()
+  @ValidateIf((_o, v) => v !== null && v !== undefined)
+  @IsMongoId()
+  assigneeId?: string | null;
 }

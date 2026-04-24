@@ -24,9 +24,17 @@ export class GridfsService implements OnModuleInit {
     return this.bucketInstance;
   }
 
-  upload(filename: string, mime: string, buffer: Buffer): Promise<ObjectId> {
+  upload(
+    filename: string,
+    mime: string,
+    buffer: Buffer,
+    metadata?: Record<string, unknown>,
+  ): Promise<ObjectId> {
     return new Promise((resolve, reject) => {
-      const uploadStream = this.bucket().openUploadStream(filename, { contentType: mime });
+      const uploadStream = this.bucket().openUploadStream(filename, {
+        contentType: mime,
+        metadata,
+      });
       Readable.from(buffer)
         .pipe(uploadStream)
         .on('error', reject)
@@ -38,13 +46,19 @@ export class GridfsService implements OnModuleInit {
     return this.bucket().openDownloadStream(id);
   }
 
-  async findFileMeta(id: ObjectId): Promise<{ length: number; contentType?: string } | null> {
+  async findFileMeta(
+    id: ObjectId,
+  ): Promise<{
+    length: number;
+    contentType?: string;
+    metadata?: Record<string, unknown>;
+  } | null> {
     if (!this.connection.db) return null;
     const doc = await this.connection.db
       .collection('attachments.files')
       .findOne({ _id: id as any });
     if (!doc) return null;
-    return { length: doc.length, contentType: doc.contentType };
+    return { length: doc.length, contentType: doc.contentType, metadata: doc.metadata };
   }
 
   async delete(id: ObjectId): Promise<void> {
@@ -53,5 +67,15 @@ export class GridfsService implements OnModuleInit {
     } catch {
       // swallow — file may already be gone; mirrors current behavior
     }
+  }
+
+  async deleteByMetadataWorkspaceId(workspaceId: ObjectId): Promise<void> {
+    if (!this.connection.db) return;
+    const files = await this.connection.db
+      .collection('attachments.files')
+      .find({ 'metadata.workspaceId': workspaceId as any })
+      .project({ _id: 1 })
+      .toArray();
+    await Promise.all(files.map((f) => this.delete(f._id as unknown as ObjectId)));
   }
 }

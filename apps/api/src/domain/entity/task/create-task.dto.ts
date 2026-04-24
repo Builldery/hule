@@ -41,4 +41,10 @@ export class CreateTaskDto {
 
     @ApiProperty({required: false}) @IsDateString() @IsOptional()
     dueDate?: string;
+
+    @ApiProperty({required: false, nullable: true})
+    @IsOptional()
+    @ValidateIf((_o, v) => v !== null && v !== undefined)
+    @IsMongoId()
+    assigneeId?: string | null;
 }

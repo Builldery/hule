@@ -25,16 +25,25 @@ export class CommentService {
 
   constructor(private readonly gridfs: GridfsService) {}
 
-  async getByTaskId(taskId: string): Promise<Array<CommentDto>> {
+  async getByTaskId(wsId: string, taskId: string): Promise<Array<CommentDto>> {
+    const wsOid = toOid(wsId);
     const docs = await this.commentModel
-      .find({ taskId: toOid(taskId) })
+      .find({ workspaceId: wsOid, taskId: toOid(taskId) })
       .sort({ createdAt: 1 });
     return (docs ?? []).map((d) => new CommentDto(d));
   }
 
-  async createForTask(taskId: string, req: FastifyRequest): Promise<CommentDto> {
+  async createForTask(
+    wsId: string,
+    taskId: string,
+    req: FastifyRequest,
+  ): Promise<CommentDto> {
+    const wsOid = toOid(wsId);
     const taskOid = toOid(taskId);
-    const task = await this.taskModel.findById(taskOid);
+    const task = await this.taskModel.findOne({
+      _id: taskOid,
+      workspaceId: wsOid,
+    });
     if (!task) throw new NotFoundException('Task not found');
 
     let body: string | undefined;
@@ -55,7 +64,12 @@ export class CommentService {
           const chunks: Array<Buffer> = [];
           for await (const c of part.file) chunks.push(c as Buffer);
           const buf = Buffer.concat(chunks);
-          const fileId = await this.gridfs.upload(part.filename, part.mimetype, buf);
+          const fileId = await this.gridfs.upload(
+            part.filename,
+            part.mimetype,
+            buf,
+            { workspaceId: wsOid },
+          );
           attachments.push({
             fileId: fileId as unknown as Types.ObjectId,
             filename: part.filename,
@@ -74,6 +88,7 @@ export class CommentService {
     }
 
     const created = await this.commentModel.create({
+      workspaceId: wsOid,
       taskId: taskOid,
       kind: 'comment',
       body,
@@ -82,11 +97,12 @@ export class CommentService {
     return new CommentDto(created);
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(wsId: string, id: string): Promise<void> {
+    const wsOid = toOid(wsId);
     const oid = toOid(id);
-    const doc = await this.commentModel.findById(oid);
+    const doc = await this.commentModel.findOne({ _id: oid, workspaceId: wsOid });
     if (!doc) return;
-    await this.commentModel.deleteOne({ _id: oid });
+    await this.commentModel.deleteOne({ _id: oid, workspaceId: wsOid });
     await Promise.all(
       (doc.attachments ?? []).map((a) =>
         this.gridfs.delete(a.fileId as unknown as import('mongodb').ObjectId),

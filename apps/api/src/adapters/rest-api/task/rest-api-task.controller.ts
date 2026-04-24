@@ -10,7 +10,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TaskService } from '../../../domain/modules/task/task.service';
 import { TaskDto } from '../../../domain/entity/task/task.dto';
 import { CreateTaskDto } from '../../../domain/entity/task/create-task.dto';
@@ -19,57 +19,85 @@ import { MoveTaskDto } from '../../../domain/entity/task/move-task.dto';
 import { TasksListQueryDto } from '../../../domain/entity/task/tasks-list-query.dto';
 import { TimelineQueryDto } from '../../../domain/entity/task/timeline-query.dto';
 import { IdParamsDto } from '../../../domain/entity/common/id-params.dto';
+import { CurrentWorkspaceId } from '../decorators/current-workspace-id.decorator';
 
 @ApiTags('Task')
-@Controller('tasks')
+@ApiBearerAuth()
+@Controller('workspaces/:workspaceId/tasks')
 export class RestApiTaskController {
   @Inject() taskService: TaskService;
 
   @ApiResponse({ type: [TaskDto] })
   @Get()
-  getByList(@Query() query: TasksListQueryDto): Promise<Array<TaskDto>> {
-    return this.taskService.getByListQuery(query);
+  getByList(
+    @CurrentWorkspaceId() wsId: string,
+    @Query() query: TasksListQueryDto,
+  ): Promise<Array<TaskDto>> {
+    return this.taskService.getByListQuery(wsId, query);
   }
 
   @ApiResponse({ type: [TaskDto] })
   @Get('timeline')
-  timeline(@Query() query: TimelineQueryDto): Promise<Array<TaskDto>> {
-    return this.taskService.timeline(query);
+  timeline(
+    @CurrentWorkspaceId() wsId: string,
+    @Query() query: TimelineQueryDto,
+  ): Promise<Array<TaskDto>> {
+    return this.taskService.timeline(wsId, query);
   }
 
   @ApiResponse({ type: [TaskDto] })
   @Get(':id/subtree')
-  subtree(@Param() params: IdParamsDto): Promise<Array<TaskDto>> {
-    return this.taskService.getSubtree(params.id);
+  subtree(
+    @CurrentWorkspaceId() wsId: string,
+    @Param() params: IdParamsDto,
+  ): Promise<Array<TaskDto>> {
+    return this.taskService.getSubtree(wsId, params.id);
   }
 
   @ApiResponse({ type: TaskDto })
   @Get(':id')
-  getById(@Param() params: IdParamsDto): Promise<TaskDto> {
-    return this.taskService.getById(params.id);
+  getById(
+    @CurrentWorkspaceId() wsId: string,
+    @Param() params: IdParamsDto,
+  ): Promise<TaskDto> {
+    return this.taskService.getById(wsId, params.id);
   }
 
   @ApiResponse({ type: TaskDto })
   @Post()
-  create(@Body() dto: CreateTaskDto): Promise<TaskDto> {
-    return this.taskService.create(dto);
+  create(
+    @CurrentWorkspaceId() wsId: string,
+    @Body() dto: CreateTaskDto,
+  ): Promise<TaskDto> {
+    return this.taskService.create(wsId, dto);
   }
 
   @ApiResponse({ type: TaskDto })
   @Patch(':id')
-  update(@Param() params: IdParamsDto, @Body() patch: UpdateTaskDto): Promise<TaskDto> {
-    return this.taskService.update(params.id, patch);
+  update(
+    @CurrentWorkspaceId() wsId: string,
+    @Param() params: IdParamsDto,
+    @Body() patch: UpdateTaskDto,
+  ): Promise<TaskDto> {
+    return this.taskService.update(wsId, params.id, patch);
   }
 
   @Post(':id/move')
   @HttpCode(204)
-  async move(@Param() params: IdParamsDto, @Body() dto: MoveTaskDto): Promise<void> {
-    await this.taskService.move(params.id, dto);
+  async move(
+    @CurrentWorkspaceId() wsId: string,
+    @Param() params: IdParamsDto,
+    @Body() dto: MoveTaskDto,
+  ): Promise<void> {
+    await this.taskService.move(wsId, params.id, dto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  async delete(@Param() params: IdParamsDto): Promise<void> {
-    await this.taskService.delete(params.id);
+  async delete(
+    @CurrentWorkspaceId() wsId: string,
+    @Param() params: IdParamsDto,
+  ): Promise<void> {
+    await this.taskService.delete(wsId, params.id);
   }
 }
