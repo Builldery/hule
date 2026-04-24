@@ -1,24 +1,24 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import AppSidebar from '@/sidebar/components/AppSidebar.vue'
 import TaskView from '@/task/views/TaskView.vue'
-import { useSpacesStore } from '@/space/store/useSpacesStore'
 import { UiCard, UiModal, UiDeleteModal } from '@buildery/ui-kit/components'
 import { useConfirmState, closeConfirm } from '@/app/compose/useConfirm'
 import { useTaskModalState, useTaskModal } from '@/app/compose/useTaskModal'
 
-const spacesStore = useSpacesStore()
+const route = useRoute()
 const confirmState = useConfirmState()
 const taskModalState = useTaskModalState()
 const taskModal = useTaskModal()
 
-onMounted(() => {
-  void spacesStore.load()
-})
+const isAuthLayout = computed(() => route.meta?.layout === 'auth')
 </script>
 
 <template>
-  <div class="app-layout">
+  <router-view v-if="isAuthLayout" />
+
+  <div v-else class="app-layout">
     <aside class="app-sidebar">
       <AppSidebar />
     </aside>

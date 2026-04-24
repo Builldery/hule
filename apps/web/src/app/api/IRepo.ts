@@ -29,37 +29,44 @@ export interface MoveTaskDto {
   order: number
 }
 
+export interface TimelineQuery {
+  spaceId?: string
+  listId?: string
+  from?: string
+  to?: string
+}
+
 export interface ISpacesRepo {
-  list(): Promise<Space[]>
-  create(dto: CreateSpaceDto): Promise<Space>
-  update(id: string, patch: UpdateSpaceDto): Promise<Space>
-  remove(id: string): Promise<void>
-  reorder(items: ReorderItem[]): Promise<void>
+  list(wsId: string): Promise<Space[]>
+  create(wsId: string, dto: CreateSpaceDto): Promise<Space>
+  update(wsId: string, id: string, patch: UpdateSpaceDto): Promise<Space>
+  remove(wsId: string, id: string): Promise<void>
+  reorder(wsId: string, items: ReorderItem[]): Promise<void>
 }
 
 export interface IListsRepo {
-  listBySpace(spaceId: string): Promise<List[]>
-  create(dto: CreateListDto): Promise<List>
-  update(id: string, patch: UpdateListDto): Promise<List>
-  remove(id: string): Promise<void>
-  reorder(items: ReorderItem[]): Promise<void>
+  listBySpace(wsId: string, spaceId: string): Promise<List[]>
+  create(wsId: string, dto: CreateListDto): Promise<List>
+  update(wsId: string, id: string, patch: UpdateListDto): Promise<List>
+  remove(wsId: string, id: string): Promise<void>
+  reorder(wsId: string, items: ReorderItem[]): Promise<void>
 }
 
 export interface ITasksRepo {
-  listByList(listId: string, opts?: { includeSubtasks?: boolean }): Promise<Task[]>
-  get(id: string): Promise<Task>
-  getSubtree(id: string): Promise<Task[]>
-  create(dto: CreateTaskDto): Promise<Task>
-  update(id: string, patch: UpdateTaskDto): Promise<Task>
-  move(id: string, dto: MoveTaskDto): Promise<void>
-  remove(id: string): Promise<void>
-  timeline(opts: { spaceId?: string; listId?: string; from?: string; to?: string }): Promise<Task[]>
+  listByList(wsId: string, listId: string, opts?: { includeSubtasks?: boolean }): Promise<Task[]>
+  get(wsId: string, id: string): Promise<Task>
+  getSubtree(wsId: string, id: string): Promise<Task[]>
+  create(wsId: string, dto: CreateTaskDto): Promise<Task>
+  update(wsId: string, id: string, patch: UpdateTaskDto): Promise<Task>
+  move(wsId: string, id: string, dto: MoveTaskDto): Promise<void>
+  remove(wsId: string, id: string): Promise<void>
+  timeline(wsId: string, opts: TimelineQuery): Promise<Task[]>
 }
 
 export interface ICommentsRepo {
-  listForTask(taskId: string): Promise<Comment[]>
-  create(taskId: string, dto: { body?: string; files?: File[] }): Promise<Comment>
-  remove(id: string): Promise<void>
+  listForTask(wsId: string, taskId: string): Promise<Comment[]>
+  create(wsId: string, taskId: string, dto: { body?: string; files?: File[] }): Promise<Comment>
+  remove(wsId: string, id: string): Promise<void>
 }
 
 export interface Repo {

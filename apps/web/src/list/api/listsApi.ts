@@ -2,14 +2,17 @@ import type { IListsRepo } from '@/app/api/IRepo'
 import type { List, ReorderItem, CreateListDto, UpdateListDto } from '@hule/types'
 import { http } from '@/app/api/httpClient'
 
+const base = (wsId: string) => `/api/workspaces/${encodeURIComponent(wsId)}/lists`
+
 export const listsHttpRepo: IListsRepo = {
-  listBySpace: (spaceId: string) =>
-    http<List[]>(`/api/lists?spaceId=${encodeURIComponent(spaceId)}`),
-  create: (dto: CreateListDto) =>
-    http<List>('/api/lists', { method: 'POST', body: JSON.stringify(dto) }),
-  update: (id: string, patch: UpdateListDto) =>
-    http<List>(`/api/lists/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
-  remove: (id: string) => http<void>(`/api/lists/${id}`, { method: 'DELETE' }),
-  reorder: (items: ReorderItem[]) =>
-    http<void>('/api/lists/reorder', { method: 'POST', body: JSON.stringify(items) }),
+  listBySpace: (wsId, spaceId) =>
+    http<List[]>(`${base(wsId)}?spaceId=${encodeURIComponent(spaceId)}`),
+  create: (wsId, dto: CreateListDto) =>
+    http<List>(base(wsId), { method: 'POST', body: JSON.stringify(dto) }),
+  update: (wsId, id, patch: UpdateListDto) =>
+    http<List>(`${base(wsId)}/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
+  remove: (wsId, id) =>
+    http<void>(`${base(wsId)}/${id}`, { method: 'DELETE' }),
+  reorder: (wsId, items: ReorderItem[]) =>
+    http<void>(`${base(wsId)}/reorder`, { method: 'POST', body: JSON.stringify(items) }),
 }

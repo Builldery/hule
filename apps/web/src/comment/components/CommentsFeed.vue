@@ -1,17 +1,67 @@
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { UiButton } from '@buildery/ui-kit/components'
 import { useCommentsStore } from '@/comment/store/useCommentsStore'
+import { useWorkspacesStore } from '@/workspace/store/useWorkspacesStore'
+import { TOKEN_STORAGE_KEY } from '@/app/api/httpClient'
 import CommentComposer from './CommentComposer.vue'
 
 const props = defineProps<{ taskId: string }>()
 
 const commentsStore = useCommentsStore()
+const workspacesStore = useWorkspacesStore()
 
 const items = computed(() => commentsStore.getForTask(props.taskId))
 
-onMounted(() => { void commentsStore.loadForTask(props.taskId) })
-watch(() => props.taskId, id => { void commentsStore.loadForTask(id) })
+const objectUrls = ref<Record<string, string>>({})
+
+async function fetchAttachmentUrl(fileId: string): Promise<void> {
+  if (objectUrls.value[fileId]) return
+  const wsId = workspacesStore.currentWorkspaceId
+  if (!wsId) return
+  const token = (() => { try { return localStorage.getItem(TOKEN_STORAGE_KEY) } catch { return null } })()
+  try {
+    const res = await fetch(`/api/workspaces/${wsId}/files/${fileId}`, {
+      headers: token ? { authorization: `Bearer ${token}` } : {},
+    })
+    if (!res.ok) return
+    const blob = await res.blob()
+    objectUrls.value = { ...objectUrls.value, [fileId]: URL.createObjectURL(blob) }
+  } catch {
+    /* ignore */
+  }
+}
+
+function syncAttachments(): void {
+  const seen = new Set<string>()
+  for (const c of items.value) {
+    for (const a of c.attachments) {
+      seen.add(a.fileId)
+      if (!objectUrls.value[a.fileId]) void fetchAttachmentUrl(a.fileId)
+    }
+  }
+  for (const fileId of Object.keys(objectUrls.value)) {
+    if (!seen.has(fileId)) {
+      URL.revokeObjectURL(objectUrls.value[fileId])
+      delete objectUrls.value[fileId]
+    }
+  }
+}
+
+onMounted(() => {
+  void commentsStore.loadForTask(props.taskId)
+})
+
+watch(() => props.taskId, id => {
+  void commentsStore.loadForTask(id)
+})
+
+watch(items, () => syncAttachments(), { deep: true, immediate: true })
+
+onBeforeUnmount(() => {
+  for (const url of Object.values(objectUrls.value)) URL.revokeObjectURL(url)
+  objectUrls.value = {}
+})
 
 function formatDate(s: string): string {
   const d = new Date(s)
@@ -46,12 +96,13 @@ async function remove(id: string): Promise<void> {
         <a
           v-for="a in c.attachments"
           :key="a.fileId"
-          :href="`/api/files/${a.fileId}`"
+          :href="objectUrls[a.fileId] ?? '#'"
+          :download="a.filename"
           target="_blank"
           rel="noopener"
           class="attachment"
         >
-          <img v-if="a.mime.startsWith('image/')" :src="`/api/files/${a.fileId}`" :alt="a.filename">
+          <img v-if="a.mime.startsWith('image/') && objectUrls[a.fileId]" :src="objectUrls[a.fileId]" :alt="a.filename">
           <span v-else class="file-name">{{ a.filename }}</span>
         </a>
       </div>

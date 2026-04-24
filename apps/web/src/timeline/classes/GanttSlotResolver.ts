@@ -1,4 +1,4 @@
-export const GHOST_HEIGHT = 28
+export const GHOST_HEIGHT = 34
 // Must match vis-timeline `margin: { item: 10, axis: 16 }` — the ghost snaps to
 // the same row grid as real items so it slots cleanly instead of drifting and
 // clipping neighbours.

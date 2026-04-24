@@ -122,6 +122,14 @@ export function useGanttGhostBar(opts: UseGanttGhostBarOptions): UseGanttGhostBa
   // Re-attach when the mount element first appears.
   watch(() => opts.mountRef.value, el => { if (el) attach() })
 
+  // Hide the ghost on timeline pan/zoom — its mount-space position is computed
+  // from the current window and goes stale the moment the range shifts.
+  watch(() => opts.timeline.value, (tl, _prev, onCleanup) => {
+    if (!tl) return
+    tl.on('rangechange', hideGhost)
+    onCleanup(() => tl.off('rangechange', hideGhost))
+  })
+
   onBeforeUnmount(detach)
 
   return { ghostVisible, ghostLeft, ghostTop, ghostWidth, ghostDay, ghostEl, attach, detach, hideGhost }

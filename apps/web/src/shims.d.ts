@@ -47,7 +47,7 @@ declare module '@buildery/ui-kit/components' {
   export const UiIcon: AnyComp
   export const UiTag: AnyComp
   export const UiCard: AnyComp
-  export const UiTabset: AnyComp
+  export const UiTabSet: AnyComp
   export const UiTab: AnyComp
   export const UiTreeView: AnyComp
   export const UiTreeViewItem: AnyComp

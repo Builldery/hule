@@ -1,6 +1,13 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import AutoComplete, { type AutoCompleteCompleteEvent, type AutoCompleteOptionSelectEvent } from 'primevue/autocomplete'
-import { UiButton, UiCard, UiInput } from '@buildery/ui-kit/components'
+import {
+  UiButton,
+  UiCard,
+  UiInput,
+  UiTabSet,
+  UiTab,
+} from '@buildery/ui-kit/components'
 import type { Task } from '@hule/types'
 
 const props = defineProps<{
@@ -11,6 +18,14 @@ const props = defineProps<{
   newTitle: string
   creating: boolean
 }>()
+
+const dayLabel = computed(() =>
+  props.popoverDay
+    ? props.popoverDay.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
+    : '',
+)
+const createPlaceholder = computed(() => dayLabel.value ? `Task name · ${dayLabel.value}` : 'Task name')
+const findPlaceholder = computed(() => dayLabel.value ? `Search undated tasks · ${dayLabel.value}` : 'Search undated tasks')
 
 const emit = defineEmits<{
   'update:activeTab': ['find' | 'create']
@@ -25,50 +40,43 @@ const emit = defineEmits<{
 
 <template>
   <UiCard class="qa-card ui--single-card">
-    <div class="qa-tabs">
-      <button
-        class="qa-tab"
-        :class="{ active: activeTab === 'find' }"
-        @click="emit('update:activeTab', 'find')"
-      >Find Task</button>
-      <button
-        class="qa-tab"
-        :class="{ active: activeTab === 'create' }"
-        @click="emit('update:activeTab', 'create')"
-      >Create Task</button>
-      <span class="qa-spacer" />
-      <span v-if="popoverDay" class="qa-date muted">
-        {{ popoverDay.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) }}
-      </span>
-    </div>
-
-    <div v-if="activeTab === 'find'" class="qa-body">
-      <AutoComplete
-        :model-value="findQuery"
-        :suggestions="findSuggestions"
-        option-label="title"
-        placeholder="Search undated tasks"
-        size="small"
-        class="qa-input"
-        :min-length="0"
-        force-selection
-        @update:model-value="v => emit('update:findQuery', v as string)"
-        @complete="ev => emit('complete', ev)"
-        @option-select="ev => emit('findSelect', ev)"
-        @focus="emit('findFocus')"
-      />
-    </div>
-    <div v-else class="qa-body">
-      <UiInput
-        :value="newTitle"
-        placeholder="Task name"
-        size="small"
-        autofocus
-        class="qa-input"
-        @update:value="(v: unknown) => emit('update:newTitle', String(v ?? ''))"
-        @keydown.enter="emit('createTask')"
-      />
-    </div>
+    <UiTabSet
+      :active-tab="activeTab"
+      class="qa-tabset"
+      @update:active-tab="(v: string) => emit('update:activeTab', v as 'find' | 'create')"
+    >
+      <UiTab value="find" label="Find Task">
+        <div class="qa-body">
+          <AutoComplete
+            :model-value="findQuery"
+            :suggestions="findSuggestions"
+            option-label="title"
+            :placeholder="findPlaceholder"
+            size="small"
+            class="qa-input"
+            :min-length="0"
+            force-selection
+            @update:model-value="(v: unknown) => emit('update:findQuery', v as string)"
+            @complete="(ev: AutoCompleteCompleteEvent) => emit('complete', ev)"
+            @option-select="(ev: AutoCompleteOptionSelectEvent) => emit('findSelect', ev)"
+            @focus="emit('findFocus')"
+          />
+        </div>
+      </UiTab>
+      <UiTab value="create" label="Create Task">
+        <div class="qa-body">
+          <UiInput
+            :value="newTitle"
+            :placeholder="createPlaceholder"
+            size="small"
+            autofocus
+            class="qa-input"
+            @update:value="(v: unknown) => emit('update:newTitle', String(v ?? ''))"
+            @keydown.enter.stop="emit('createTask')"
+          />
+        </div>
+      </UiTab>
+    </UiTabSet>
 
     <template v-if="activeTab === 'create'" #footer>
       <div class="qa-footer">
@@ -87,48 +95,27 @@ const emit = defineEmits<{
 </template>
 
 <style scoped>
-/* UiCard token overrides — zero internal padding/gap, tighter radius.
-   Each section controls its own spacing so the tab underline runs
-   edge-to-edge while the body stays tight. The #footer gets its own
-   default padding from UiCard (divider + gray background). */
+/* UiCard tokens — zero padding/gap, tighter radius. Sections manage
+   their own spacing. */
 .qa-card {
   --card-padding: 0;
   --card-content__gap: 0;
   --card__border-radius: 6px;
   min-width: 280px;
 }
-.qa-tabs {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  border-bottom: 1px solid var(--border);
+/* UiTabSet wraps tabs + content in a flex-column. We only need to
+   ensure the tab bar has a small left padding and the body has a tight
+   padding (managed by `.qa-body`). */
+.qa-tabset :deep(.ui--flex-row) {
   padding: 0 8px;
+  margin-top: 2px;
 }
-.qa-tab {
-  background: transparent;
-  border: none;
-  padding: 6px 8px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-muted);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-}
-.qa-tab:hover { color: var(--text); }
-.qa-tab.active {
-  color: var(--text);
-  border-bottom-color: var(--accent-primary);
-}
-.qa-spacer { flex: 1; }
-.qa-date { font-size: 12px; margin-right: 8px; }
-.qa-body { display: flex; flex-direction: column; gap: 6px; padding: 8px; }
+.qa-body { padding: 8px; }
 .qa-input { width: 100%; }
 .qa-input :deep(.p-inputtext) { width: 100%; }
 .qa-input :deep(.p-autocomplete-input) { width: 100%; }
-/* UiCard's footer only sets vertical padding — we add the horizontal
-   8px ourselves so the button lines up with the input above (which is
-   inside `.qa-body` with the same 8px padding). */
+/* UiCard's footer sets only vertical padding — add 8px horizontal so the
+   button lines up with the input above (inside `.qa-body`). */
 .qa-footer { padding: 0 8px; }
 .qa-create-btn :deep(.ui-button-wrapper) {
   width: 100%;

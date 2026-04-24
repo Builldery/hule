@@ -6,16 +6,15 @@
   background: transparent;
   color: #fff;
   border: none;
-  padding: 0 15px;
+  padding: 0 12px;
   box-sizing: border-box;
-  height: 28px !important;
-  line-height: 28px;
+  height: 34px !important;
+  line-height: 34px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   box-shadow: none;
   cursor: pointer;
   transition: filter 0.12s ease;
-  overflow: hidden;
   z-index: 1;
   /* Do NOT set `position` — vis-timeline positions items with transform. */
 }
@@ -27,49 +26,52 @@
   left: 5px;
   right: 5px;
   bottom: 0;
-  background: var(--bar-color);
+  background: color-mix(in srgb, var(--bar-color) 82%, #fff);
   border-radius: 6px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  box-shadow:
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12),
+    0 2px 5px rgba(15, 23, 42, 0.18),
+    0 5px 12px 1px rgba(15, 23, 42, 0.1);
   transition: box-shadow 0.12s ease;
   z-index: -1;
 }
 
-.vis-mount .vis-item.hule-bar:hover::before {
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.14);
-}
-.vis-mount .vis-item.hule-bar:hover { filter: brightness(1.04); }
+.vis-mount .vis-item.hule-bar:hover { filter: brightness(1.05); }
 
-.vis-mount .vis-item.hule-bar.is-done::before { opacity: 0.68; }
-
-.vis-mount .vis-item.vis-selected.hule-bar::before {
-  box-shadow: 0 0 0 2px var(--accent-primary), 0 2px 8px rgba(99, 102, 241, 0.28);
+/* Active drag/resize — `.hule-active` is toggled on the pressed item by
+   useVisTimeline (pointerdown / pointerup). Restores full saturation, lifts
+   with a strong shadow, and adds an accent-colored ring to stand out from
+   neighbours. */
+.vis-mount .vis-item.hule-bar.hule-active {
+  filter: brightness(1.1) saturate(1.15);
+  z-index: 3;
 }
-
-/* Priority stripe — 4px inset on the body pseudo. */
-.vis-mount .vis-item.hule-bar.has-priority::before {
+.vis-mount .vis-item.hule-bar.hule-active::before {
+  background: var(--bar-color);
   box-shadow:
-    inset 4px 0 0 var(--priority-color),
-    0 1px 2px rgba(15, 23, 42, 0.08);
-}
-.vis-mount .vis-item.hule-bar.has-priority:hover::before {
-  box-shadow:
-    inset 4px 0 0 var(--priority-color),
-    0 2px 8px rgba(15, 23, 42, 0.14);
-}
-.vis-mount .vis-item.vis-selected.hule-bar.has-priority::before {
-  box-shadow:
-    inset 4px 0 0 var(--priority-color),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.7),
     0 0 0 2px var(--accent-primary),
-    0 2px 8px rgba(99, 102, 241, 0.28);
+    0 12px 28px rgba(15, 23, 42, 0.34),
+    0 3px 8px rgba(15, 23, 42, 0.22);
 }
-.vis-mount .vis-item.hule-bar.has-priority {
-  padding-left: 19px;  /* 5 gap + 4 stripe + 10 breathing */
+
+/* Priority dot before the content text. */
+.vis-mount .vis-item.hule-bar.has-priority .vis-item-content::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff;
+  margin-right: 8px;
+  vertical-align: middle;
+  box-shadow: 0 0 0 1.5px var(--priority-color);
 }
 
 /* Content: one-line ellipsis. */
 .vis-mount .vis-item.hule-bar .vis-item-content {
   padding: 0;
-  font-weight: 500;
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -94,11 +96,10 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 3px;
+  width: 2px;
   height: 14px;
-  background: #fff;
-  border-radius: 2px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.25);
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 1px;
 }
 
 .vis-mount .vis-item.hule-bar:hover .vis-drag-left,
@@ -109,30 +110,42 @@
 }
 
 /* ── Quick-add ghost bar ───────────────────────────────────────
-   The ghost element is now a UiPopoverTrigger wrapper div — the trigger
-   needs pointer-events:auto to receive the click that opens the popover.
-   Default state is hidden; `.is-visible` is toggled from ghost tracking. */
+   Purely visual — `pointer-events: none` lets wheel/hover pass through to
+   vis-timeline's center panel (otherwise horizontal scroll breaks until the
+   user first clicks on a bar and the ghost hides). Clicks are handled at the
+   .vis-mount level and open the popover imperatively. Visibility is toggled
+   with v-show. */
 .hule-ghost {
   position: absolute;
-  height: 28px;
+  height: 34px;
   border-radius: 6px;
   background: var(--hover);
   border: 1px dashed var(--text-muted);
+  pointer-events: none;
   z-index: 2;
   transition: opacity 0.1s ease;
   opacity: 0.9;
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: flex-end;
   padding-right: 6px;
   color: var(--text-muted);
   font-size: 11px;
-  cursor: pointer;
 }
-.hule-ghost.is-visible { display: flex; }
 .hule-ghost::before {
   content: 'Click to add';
   margin-left: 8px;
   margin-right: auto;
   font-weight: 500;
+}
+
+/* Invisible anchor for UiPopover positioning — tracks the ghost's rect so
+   the popover panel opens at the ghost location. `visibility: hidden` keeps
+   the element in layout (getBoundingClientRect works) without rendering or
+   capturing pointer events. */
+.hule-ghost-anchor {
+  position: absolute;
+  height: 34px;
+  visibility: hidden;
+  pointer-events: none;
 }

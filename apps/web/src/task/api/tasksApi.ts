@@ -2,32 +2,35 @@ import type { ITasksRepo, CreateTaskDto, UpdateTaskDto, MoveTaskDto } from '@/ap
 import type { Task } from '@hule/types'
 import { http } from '@/app/api/httpClient'
 
-function qs(params: Record<string, string | boolean | undefined>): string {
+const base = (wsId: string) => `/api/workspaces/${encodeURIComponent(wsId)}/tasks`
+
+function qs(params: Record<string, unknown>): string {
   const parts: string[] = []
   for (const [k, v] of Object.entries(params)) {
-    if (v === undefined) continue
+    if (v === undefined || v === null) continue
     parts.push(`${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
   }
   return parts.length ? `?${parts.join('&')}` : ''
 }
 
 export const tasksHttpRepo: ITasksRepo = {
-  listByList: (listId, opts) =>
-    http<Task[]>(`/api/tasks${qs({ listId, includeSubtasks: opts?.includeSubtasks })}`),
+  listByList: (wsId, listId, opts) =>
+    http<Task[]>(`${base(wsId)}${qs({ listId, includeSubtasks: opts?.includeSubtasks })}`),
 
-  get: (id) => http<Task>(`/api/tasks/${id}`),
-  getSubtree: (id) => http<Task[]>(`/api/tasks/${id}/subtree`),
+  get: (wsId, id) => http<Task>(`${base(wsId)}/${id}`),
 
-  create: (dto: CreateTaskDto) =>
-    http<Task>('/api/tasks', { method: 'POST', body: JSON.stringify(dto) }),
+  getSubtree: (wsId, id) => http<Task[]>(`${base(wsId)}/${id}/subtree`),
 
-  update: (id, patch: UpdateTaskDto) =>
-    http<Task>(`/api/tasks/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
+  create: (wsId, dto: CreateTaskDto) =>
+    http<Task>(base(wsId), { method: 'POST', body: JSON.stringify(dto) }),
 
-  move: (id, dto: MoveTaskDto) =>
-    http<void>(`/api/tasks/${id}/move`, { method: 'POST', body: JSON.stringify(dto) }),
+  update: (wsId, id, patch: UpdateTaskDto) =>
+    http<Task>(`${base(wsId)}/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
 
-  remove: (id) => http<void>(`/api/tasks/${id}`, { method: 'DELETE' }),
+  move: (wsId, id, dto: MoveTaskDto) =>
+    http<void>(`${base(wsId)}/${id}/move`, { method: 'POST', body: JSON.stringify(dto) }),
 
-  timeline: (opts) => http<Task[]>(`/api/tasks/timeline${qs(opts)}`),
+  remove: (wsId, id) => http<void>(`${base(wsId)}/${id}`, { method: 'DELETE' }),
+
+  timeline: (wsId, opts) => http<Task[]>(`${base(wsId)}/timeline${qs({ ...opts })}`),
 }

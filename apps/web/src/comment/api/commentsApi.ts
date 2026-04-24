@@ -2,15 +2,19 @@ import type { ICommentsRepo } from '@/app/api/IRepo'
 import type { Comment } from '@hule/types'
 import { http } from '@/app/api/httpClient'
 
-export const commentsHttpRepo: ICommentsRepo = {
-  listForTask: (taskId: string) => http<Comment[]>(`/api/tasks/${taskId}/comments`),
+const wsBase = (wsId: string) => `/api/workspaces/${encodeURIComponent(wsId)}`
 
-  create: (taskId: string, dto: { body?: string; files?: File[] }) => {
+export const commentsHttpRepo: ICommentsRepo = {
+  listForTask: (wsId, taskId) =>
+    http<Comment[]>(`${wsBase(wsId)}/tasks/${taskId}/comments`),
+
+  create: (wsId, taskId, dto) => {
     const fd = new FormData()
     if (dto.body) fd.append('body', dto.body)
     for (const f of dto.files ?? []) fd.append('files', f, f.name)
-    return http<Comment>(`/api/tasks/${taskId}/comments`, { method: 'POST', body: fd })
+    return http<Comment>(`${wsBase(wsId)}/tasks/${taskId}/comments`, { method: 'POST', body: fd })
   },
 
-  remove: (id: string) => http<void>(`/api/comments/${id}`, { method: 'DELETE' }),
+  remove: (wsId, id) =>
+    http<void>(`${wsBase(wsId)}/comments/${id}`, { method: 'DELETE' }),
 }

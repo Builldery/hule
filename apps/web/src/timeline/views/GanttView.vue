@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import {
   UiPopover,
   UiPopoverTrigger,
@@ -36,6 +36,7 @@ const visibleTasks = computed<Task[]>(() =>
 )
 
 const mount = ref<HTMLDivElement | null>(null)
+const popoverRef = ref<{ open: () => void } | null>(null)
 
 let suppressNextSync = false
 const visTl = useVisTimeline({
@@ -67,11 +68,20 @@ const ghost = useGanttGhostBar({
   popoverOpen: quickAdd.popoverOpen,
 })
 
-// Capture-phase handler fires before UiPopoverTrigger's internal onClick
-// toggles popoverOpen, so popoverDay is already set when the panel renders.
-function onGhostClickCapture(): void {
-  if (!ghost.ghostDay.value) return
+// Clicks on the ghost bar pass through to the timeline panel (the ghost is
+// `pointer-events: none` so wheel/hover reach vis-timeline). We open the
+// popover imperatively from a mount-level click handler; the separate
+// `UiPopoverTrigger` anchor is kept invisible, serving only as a positioning
+// target for the popover panel.
+function onMountClick(e: MouseEvent): void {
+  if (!ghost.ghostVisible.value || !ghost.ghostDay.value) return
+  const target = e.target as HTMLElement | null
+  if (!target) return
+  if (target.closest('.vis-item') || target.closest('.vis-time-axis')) return
+  if (!target.closest('.vis-panel.vis-center')) return
   quickAdd.prepareOpen(ghost.ghostDay.value)
+  e.stopPropagation()
+  popoverRef.value?.open()
 }
 
 function onPopoverClose(): void {
@@ -90,6 +100,11 @@ function rebuildTimeline(): void {
 onMounted(async () => {
   await tasksStore.loadForList(props.listId)
   rebuildTimeline()
+  mount.value?.addEventListener('click', onMountClick)
+})
+
+onBeforeUnmount(() => {
+  mount.value?.removeEventListener('click', onMountClick)
 })
 
 watch(() => props.listId, async id => {
@@ -117,7 +132,17 @@ watch(visibleTasks, () => {
       No scheduled tasks in this list. Set Start date and Due date on a task to see it here.
     </div>
     <div ref="mount" class="vis-mount">
+      <div
+        v-show="ghost.ghostVisible.value"
+        class="hule-ghost"
+        :style="{
+          left: ghost.ghostLeft.value + 'px',
+          top: ghost.ghostTop.value + 'px',
+          width: ghost.ghostWidth.value + 'px',
+        }"
+      />
       <UiPopover
+        ref="popoverRef"
         :is-open="quickAdd.popoverOpen.value"
         direction="below"
         :close-on-content-click="false"
@@ -125,14 +150,13 @@ watch(visibleTasks, () => {
         @close="onPopoverClose"
       >
         <UiPopoverTrigger
-          class="hule-ghost"
-          :class="{ 'is-visible': ghost.ghostVisible.value }"
+          class="hule-ghost-anchor"
           :style="{
             left: ghost.ghostLeft.value + 'px',
             top: ghost.ghostTop.value + 'px',
             width: ghost.ghostWidth.value + 'px',
           }"
-          @click.capture="onGhostClickCapture"
+          tabindex="-1"
         />
         <UiPopoverPanel>
           <GanttQuickAddPopover

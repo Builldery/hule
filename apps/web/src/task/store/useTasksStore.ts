@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import type { Task } from '@hule/types'
 import type { CreateTaskDto, UpdateTaskDto, MoveTaskDto } from '@/app/api/IRepo'
 import { repo } from '@/app/api'
+import { useWorkspacesStore } from '@/workspace/store/useWorkspacesStore'
 
 export const useTasksStore = defineStore('tasks', () => {
   const byList = ref<Record<string, Task[]>>({})
@@ -20,6 +21,10 @@ export const useTasksStore = defineStore('tasks', () => {
     return out
   })
 
+  function wsId(): string {
+    return useWorkspacesStore().requireCurrentId()
+  }
+
   function getForList(listId: string): Task[] {
     return byList.value[listId] ?? []
   }
@@ -33,7 +38,7 @@ export const useTasksStore = defineStore('tasks', () => {
     if (loadingLists.value.has(listId)) return
     loadingLists.value.add(listId)
     try {
-      const arr = await repo.tasks.listByList(listId, { includeSubtasks: true })
+      const arr = await repo.tasks.listByList(wsId(), listId, { includeSubtasks: true })
       byList.value = { ...byList.value, [listId]: arr }
     } finally {
       loadingLists.value.delete(listId)
@@ -41,7 +46,7 @@ export const useTasksStore = defineStore('tasks', () => {
   }
 
   async function loadSubtree(rootId: string): Promise<void> {
-    const arr = await repo.tasks.getSubtree(rootId)
+    const arr = await repo.tasks.getSubtree(wsId(), rootId)
     subtrees.value = { ...subtrees.value, [rootId]: arr }
   }
 
@@ -66,19 +71,19 @@ export const useTasksStore = defineStore('tasks', () => {
   }
 
   async function create(dto: CreateTaskDto): Promise<Task> {
-    const created = await repo.tasks.create(dto)
+    const created = await repo.tasks.create(wsId(), dto)
     upsertInList(created)
     return created
   }
 
   async function update(id: string, patch: UpdateTaskDto): Promise<Task> {
-    const updated = await repo.tasks.update(id, patch)
+    const updated = await repo.tasks.update(wsId(), id, patch)
     upsertInList(updated)
     return updated
   }
 
   async function move(id: string, dto: MoveTaskDto): Promise<void> {
-    await repo.tasks.move(id, dto)
+    await repo.tasks.move(wsId(), id, dto)
     const task = byId.value[id]
     if (!task) return
     const prevListId = task.listId
@@ -96,15 +101,21 @@ export const useTasksStore = defineStore('tasks', () => {
   }
 
   async function remove(id: string): Promise<void> {
-    await repo.tasks.remove(id)
+    await repo.tasks.remove(wsId(), id)
     removeFromAll(id)
+  }
+
+  function reset(): void {
+    byList.value = {}
+    subtrees.value = {}
+    loadingLists.value = new Set()
   }
 
   return {
     byList, subtrees, byId,
     getForList, getSubtree,
     loadForList, loadSubtree,
-    create, update, move, remove,
+    create, update, move, remove, reset,
   }
 })
 
