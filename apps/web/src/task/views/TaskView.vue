@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   UiButton,
+  UiInfo,
   UiInput,
   UiCombobox,
   UiListboxOption,
@@ -252,7 +253,7 @@ const dueDateValue = computed({
           :all="subtree"
         />
       </UiTreeView>
-      <div v-else class="muted">No subtasks yet.</div>
+      <UiInfo v-else>No subtasks yet.</UiInfo>
     </section>
 
     <section class="section">

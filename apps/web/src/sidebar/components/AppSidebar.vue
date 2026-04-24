@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import {
   UiButton,
+  UiInfo,
   UiRawInput,
   UiTreeView,
 } from '@buildery/ui-kit/components'
@@ -70,9 +71,9 @@ function cancel(): void {
     </div>
 
     <div v-if="spacesStore.loading && !spacesStore.loaded" class="sidebar-empty muted">Loading…</div>
-    <div v-else-if="spacesStore.items.length === 0 && !adding" class="sidebar-empty muted">
+    <UiInfo v-else-if="spacesStore.items.length === 0 && !adding" class="sidebar-info">
       No spaces yet
-    </div>
+    </UiInfo>
 
     <UiTreeView v-else>
       <SpaceNode
@@ -113,5 +114,8 @@ function cancel(): void {
 .sidebar-empty {
   padding: 8px 16px;
   font-size: 13px;
+}
+.sidebar-info {
+  margin: 8px 12px;
 }
 </style>

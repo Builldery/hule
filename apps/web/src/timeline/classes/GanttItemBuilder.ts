@@ -1,9 +1,27 @@
 import type { DataItem } from 'vis-timeline/standalone'
 import type { Task } from '@hule/types'
-import { escapeHtml } from '@hule/utils'
+import { DAY_MS, escapeHtml } from '@hule/utils'
 import { statusMeta, priorityMeta } from '@/task/constants/tasks'
 
-const DATE_FMT: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' }
+// `dueDate` is the last inclusive day. Bar ends at that day's 23:59:59.999 so
+// Apr 23 → Apr 24 spans both columns, and same-day tasks still fill one column.
+// The trailing 1ms also keeps vis-timeline from treating edge-touching items
+// (a.end === b.start) as overlapping and bumping them to different rows.
+function endOfDay(iso: string): Date {
+  const d = new Date(iso)
+  d.setHours(0, 0, 0, 0)
+  return new Date(d.getTime() + DAY_MS - 1)
+}
+
+// The 3-day view resizes at hour granularity and stores the hour-precise end
+// directly. For those tasks we render the bar to the stored time; anything
+// saved at midnight keeps the day-level "end of last inclusive day" semantics.
+function resolveEnd(iso: string): Date {
+  const d = new Date(iso)
+  const atMidnight = d.getHours() === 0 && d.getMinutes() === 0
+    && d.getSeconds() === 0 && d.getMilliseconds() === 0
+  return atMidnight ? endOfDay(iso) : d
+}
 
 /** Convert a `Task` with both dates set to a vis-timeline DataItem. */
 export function toDataItem(t: Task): DataItem {
@@ -11,23 +29,13 @@ export function toDataItem(t: Task): DataItem {
   const p = priorityMeta(t.priority)
   const done = t.status === 'done'
   const hasPriority = t.priority !== 'none'
-  const fmt = (iso: string): string => new Date(iso).toLocaleDateString(undefined, DATE_FMT)
-  const title = [
-    `<b>${escapeHtml(t.title)}</b>`,
-    `${fmt(t.startDate!)} → ${fmt(t.dueDate!)}`,
-    `Status: ${s.label}${hasPriority ? ` · Priority: ${p.label}` : ''}`,
-  ].join('<br>')
-  // Shrink end by 1ms: vis-timeline treats edge-touching items
-  // (a.end === b.start) as overlapping and bumps them to different rows.
-  // `onMove` adds the 1ms back before persisting.
   return {
     id: t.id,
     content: escapeHtml(t.title),
     start: new Date(t.startDate!),
-    end: new Date(new Date(t.dueDate!).getTime() - 1),
+    end: resolveEnd(t.dueDate!),
     type: 'range',
     editable: { updateTime: true, updateGroup: false, remove: false },
-    title,
     className: [
       'hule-bar',
       `hule-status-${t.status}`,

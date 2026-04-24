@@ -6,6 +6,7 @@ import { durationMs } from '../classes/GanttItemBuilder'
 export interface UseVisTimelineOptions {
   mountRef: Ref<HTMLDivElement | null>
   window: { start: Date; end: Date }
+  snapUnit: Ref<'hour' | 'day'>
   onItemMove: (id: string, start: Date, end: Date) => Promise<void>
   onItemClick: (id: string) => void
 }
@@ -92,11 +93,11 @@ export function useVisTimeline(opts: UseVisTimelineOptions): UseVisTimelineRetur
       orientation: { axis: 'top', item: 'top' },
       // Longer bars on top — less eye travel to the dominant work item.
       order: (a, b) => durationMs(b) - durationMs(a),
-      // Drag step = 1 day with edge-aware rules:
-      // - left-edge resize: floor start to midnight (touching day N-1 → extend).
-      // - right-edge resize: ceil end to next midnight − 1ms (touching day N+1
-      //   → extend). Symmetric with the left edge; without this, users have to
-      //   drag the right edge all the way into day N+2 before the bar grows.
+      // Drag step follows `snapUnit` (day by default; hour in the 3-day view):
+      // - left-edge resize: floor start to the unit boundary.
+      // - right-edge resize: ceil end to next unit boundary − 1ms — symmetric
+      //   with the left edge; without the −1ms the bar wouldn't include the
+      //   final unit visually.
       // - whole-bar move: floor start, preserve duration.
       onMoving: (item, callback) => {
         if (!item.id || !item.start || !item.end) { callback(null); return }
@@ -111,28 +112,38 @@ export function useVisTimeline(opts: UseVisTimelineOptions): UseVisTimelineRetur
         const startMoved = newStart.getTime() !== prevStart.getTime()
         const endMoved = newEnd.getTime() !== prevEnd.getTime()
 
-        const floorDay = (d: Date): Date => {
-          const x = new Date(d); x.setHours(0, 0, 0, 0); return x
-        }
-        // Preserves the dataset's `dueDate − 1ms` convention from toDataItem.
-        const ceilDayMinus1Ms = (d: Date): Date => {
+        const hourMode = opts.snapUnit.value === 'hour'
+
+        const floorUnit = (d: Date): Date => {
           const x = new Date(d)
-          const atMidnight = x.getHours() === 0 && x.getMinutes() === 0
-            && x.getSeconds() === 0 && x.getMilliseconds() === 0
-          x.setHours(0, 0, 0, 0)
-          if (!atMidnight) x.setDate(x.getDate() + 1)
+          if (hourMode) x.setMinutes(0, 0, 0)
+          else x.setHours(0, 0, 0, 0)
+          return x
+        }
+        const ceilUnitMinus1Ms = (d: Date): Date => {
+          const x = new Date(d)
+          if (hourMode) {
+            const atHour = x.getMinutes() === 0 && x.getSeconds() === 0 && x.getMilliseconds() === 0
+            x.setMinutes(0, 0, 0)
+            if (!atHour) x.setHours(x.getHours() + 1)
+          } else {
+            const atMidnight = x.getHours() === 0 && x.getMinutes() === 0
+              && x.getSeconds() === 0 && x.getMilliseconds() === 0
+            x.setHours(0, 0, 0, 0)
+            if (!atMidnight) x.setDate(x.getDate() + 1)
+          }
           return new Date(x.getTime() - 1)
         }
 
         if (startMoved && endMoved) {
           const duration = prevEnd.getTime() - prevStart.getTime()
-          const snapped = floorDay(newStart)
+          const snapped = floorUnit(newStart)
           item.start = snapped
           item.end = new Date(snapped.getTime() + duration)
         } else if (startMoved) {
-          item.start = floorDay(newStart)
+          item.start = floorUnit(newStart)
         } else if (endMoved) {
-          item.end = ceilDayMinus1Ms(newEnd)
+          item.end = ceilUnitMinus1Ms(newEnd)
         }
         callback(item)
       },
@@ -142,11 +153,15 @@ export function useVisTimeline(opts: UseVisTimelineOptions): UseVisTimelineRetur
         const end = toDate(item.end)
         if (end.getTime() <= start.getTime()) { callback(null); return }
         skipNextClick = true
-        // Restore the 1ms stripped in toDataItem so the canonical end is back
-        // on the day boundary (matches how we create tasks from quick-add).
-        const restoredEnd = new Date(end.getTime() + 1)
+        // In day mode the vis-timeline end is `<last day> 23:59:59.999` and the
+        // canonical dueDate (inclusive convention) is that day at 00:00. In
+        // hour mode we preserve the hour-precise end as-is so the bar can start
+        // and finish mid-day.
+        const storedEnd = opts.snapUnit.value === 'hour'
+          ? end
+          : (() => { const m = new Date(end); m.setHours(0, 0, 0, 0); return m })()
         opts
-          .onItemMove(String(item.id), start, restoredEnd)
+          .onItemMove(String(item.id), start, storedEnd)
           .then(() => callback(item))
           .catch((e) => {
             console.error('Failed to update dates', e)

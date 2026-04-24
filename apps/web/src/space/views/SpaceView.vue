@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { UiButton } from '@buildery/ui-kit/components'
+import { UiButton, UiCard, UiInfo } from '@buildery/ui-kit/components'
 import { useSpacesStore } from '@/space/store/useSpacesStore'
 import { useListsStore } from '@/list/store/useListsStore'
 
@@ -25,14 +25,12 @@ watch(() => props.spaceId, (id) => {
 <template>
   <div v-if="!space && spacesStore.loaded" class="muted">Space not found.</div>
   <div v-else-if="space" class="space-view">
-    <header class="page-head">
-      <h1>{{ space.name }}</h1>
-    </header>
-
-    <section>
-      <h2>Lists</h2>
-      <div v-if="lists.length === 0" class="muted">No lists in this space yet.</div>
-      <ul class="list-grid">
+    <UiCard class="lists-card ui--single-card">
+      <template #header>
+        <h2 class="lists-heading">Lists</h2>
+      </template>
+      <UiInfo v-if="lists.length === 0">No lists in this space yet.</UiInfo>
+      <ul v-else class="list-grid">
         <li v-for="l in lists" :key="l.id">
           <UiButton
             fill="text"
@@ -43,7 +41,7 @@ watch(() => props.spaceId, (id) => {
           </UiButton>
         </li>
       </ul>
-    </section>
+    </UiCard>
   </div>
 </template>
 
@@ -54,9 +52,7 @@ watch(() => props.spaceId, (id) => {
   overflow-y: auto;
   box-sizing: border-box;
 }
-.page-head { margin-bottom: 16px; }
-h1 { margin: 0; font-size: 24px; font-weight: 600; }
-h2 { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; }
+.lists-heading { margin: 0; font-size: 14px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; }
 .list-grid {
   list-style: none;
   padding: 0;

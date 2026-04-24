@@ -1,10 +1,12 @@
 :root {
-  --sidebar-width: 280px;
-  --header-height: 48px;
+  --sidebar-width: 260px;
+  --header-height: 56px;
+  --shell-gap: 12px;
 
   /* Semantic tokens — values resolved via ui-kit palette (libs/styles-kit).
      Names kept stable so existing `var(--bg)` usages across components need no change. */
   --bg:            rgb(var(--ui--rgb-color__white));
+  --bg-app:        #E4F2EF;
   --bg-muted:      var(--ui--color__gray--100);
   --border:        var(--ui--color__gray--500);
   --text:          var(--ui--color__gray--1400);
@@ -44,7 +46,7 @@ html, body, #app {
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background: var(--bg);
+  background: var(--bg-app);
 }
 
 button { font: inherit; }
@@ -61,22 +63,39 @@ i[class*=" pi-"] {
 .app-layout {
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-rows: var(--header-height) 1fr;
+  gap: var(--shell-gap);
+  padding: var(--shell-gap);
   height: 100vh;
+  background: var(--bg-app);
+}
+
+.app-topbar {
+  grid-column: 1 / 3;
+  grid-row: 1;
+  min-width: 0;
+  background: var(--bg);
+  overflow: hidden;
 }
 
 .app-sidebar {
-  border-right: 1px solid var(--border);
-  background: var(--bg-muted);
+  grid-column: 1;
+  grid-row: 2;
+  background: var(--bg);
   overflow-y: auto;
   padding: 12px 0;
+  min-height: 0;
 }
 
 .app-main {
+  grid-column: 2;
+  grid-row: 2;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   min-width: 0;
   min-height: 0;
+  background: var(--bg);
 }
 
 .muted { color: var(--text-muted); }

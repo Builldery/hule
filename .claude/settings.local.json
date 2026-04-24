@@ -10,7 +10,12 @@
       "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
       "Bash(pnpm type-check *)",
       "mcp__jetbrains__get_file_problems",
-      "Bash(pnpm run *)"
+      "Bash(pnpm run *)",
+      "Bash(pnpm --filter @hule/web exec vue-tsc --noEmit)",
+      "Bash(pnpm --filter @hule/web type-check)",
+      "Bash(pnpm exec *)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(npx vue-tsc *)"
     ]
   }
 }

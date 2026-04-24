@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { UiButton } from '@buildery/ui-kit/components'
+import { UiButton, UiInfo } from '@buildery/ui-kit/components'
 import { useCommentsStore } from '@/comment/store/useCommentsStore'
 import { useWorkspacesStore } from '@/workspace/store/useWorkspacesStore'
 import { TOKEN_STORAGE_KEY } from '@/app/api/httpClient'
@@ -75,7 +75,7 @@ async function remove(id: string): Promise<void> {
 
 <template>
   <div class="feed">
-    <div v-if="items.length === 0" class="muted empty">No comments yet.</div>
+    <UiInfo v-if="items.length === 0">No comments yet.</UiInfo>
     <div v-for="c in items" :key="c.id" class="comment">
       <header class="head">
         <span class="kind muted">{{ c.kind === 'activity' ? '• activity' : 'Comment' }}</span>
@@ -113,7 +113,6 @@ async function remove(id: string): Promise<void> {
 
 <style scoped>
 .feed { display: flex; flex-direction: column; gap: 12px; }
-.empty { padding: 8px 0; }
 .comment {
   border: 1px solid var(--border);
   border-radius: 8px;

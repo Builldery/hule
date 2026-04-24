@@ -5,7 +5,7 @@ import {
   UiRadioGroup,
   UiRadioButton,
 } from '@buildery/ui-kit/components'
-import type { ViewMode } from '../classes/GanttWindowCalculator'
+import { VIEW_MODE_LABEL, type ViewMode } from '../classes/GanttWindowCalculator'
 
 defineProps<{
   modelValue: ViewMode
@@ -32,7 +32,7 @@ const emit = defineEmits<{
           v-for="m in viewModes"
           :key="m"
           :value="m"
-          :label="m"
+          :label="VIEW_MODE_LABEL[m]"
           size="small"
         />
       </UiRadioGroup>

@@ -1,14 +1,23 @@
 import type { Task } from '@hule/types'
 import { DAY_MS } from '@hule/utils'
 
-export type ViewMode = 'Week' | 'Month' | 'Quarter' | 'Year'
-export const VIEW_MODES: ViewMode[] = ['Week', 'Month', 'Quarter', 'Year']
+export type ViewMode = 'Days3' | 'Week' | 'Weeks2' | 'Month' | 'Year'
+export const VIEW_MODES: ViewMode[] = ['Days3', 'Week', 'Weeks2', 'Month', 'Year']
 
 export const DAYS_IN_VIEW: Record<ViewMode, number> = {
+  Days3: 3,
   Week: 7,
+  Weeks2: 14,
   Month: 30,
-  Quarter: 90,
   Year: 365,
+}
+
+export const VIEW_MODE_LABEL: Record<ViewMode, string> = {
+  Days3: '3 days',
+  Week: 'Week',
+  Weeks2: '2 weeks',
+  Month: 'Month',
+  Year: 'Year',
 }
 
 export function windowForMode(mode: ViewMode, center: Date = new Date()): { start: Date; end: Date } {

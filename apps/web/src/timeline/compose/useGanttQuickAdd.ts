@@ -1,7 +1,6 @@
 import { ref, type Ref } from 'vue'
 import type { AutoCompleteCompleteEvent, AutoCompleteOptionSelectEvent } from 'primevue/autocomplete'
 import type { Task } from '@hule/types'
-import { DAY_MS } from '@hule/utils'
 import { useTasksStore } from '@/task/store/useTasksStore'
 
 export interface UseGanttQuickAddOptions {
@@ -41,8 +40,8 @@ export function useGanttQuickAdd(opts: UseGanttQuickAddOptions): UseGanttQuickAd
   function dayRange(day: Date): { startISO: string; endISO: string } {
     const start = new Date(day)
     start.setHours(0, 0, 0, 0)
-    const end = new Date(start.getTime() + DAY_MS)
-    return { startISO: start.toISOString(), endISO: end.toISOString() }
+    const iso = start.toISOString()
+    return { startISO: iso, endISO: iso }
   }
 
   function filterTasks(query: string): void {

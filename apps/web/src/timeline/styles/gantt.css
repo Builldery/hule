@@ -20,14 +20,14 @@
 }
 .vis-mount .vis-time-axis .vis-text {
   color: #6b7280;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   text-align: center;
   box-sizing: border-box;
 }
 .vis-mount .vis-time-axis .vis-text.vis-major {
   color: #111827;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.2px;
   text-transform: uppercase;
@@ -51,8 +51,8 @@
 .vis-mount .vis-time-axis .vis-grid.vis-sunday {
   background: repeating-linear-gradient(
     -45deg,
-    transparent 0 5px,
-    rgba(148, 163, 184, 0.22) 5px 6px
+    transparent 0 3px,
+    rgba(148, 163, 184, 0.35) 3px 4px
   );
 }
 
@@ -102,16 +102,3 @@
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18);
 }
 
-/* ── Tooltip ─────────────────────────────────────────────────── */
-.vis-tooltip {
-  background: #0f172a !important;
-  color: #f1f5f9 !important;
-  border: none !important;
-  border-radius: 6px !important;
-  padding: 8px 10px !important;
-  font-size: 12px !important;
-  line-height: 1.45 !important;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
-  max-width: 280px;
-}
-.vis-tooltip b { color: #fff; }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { UiInput } from '@buildery/ui-kit/components'
+import { UiInfo, UiInput } from '@buildery/ui-kit/components'
 import { useTasksStore } from '@/task/store/useTasksStore'
 import TaskRow from './TaskRow.vue'
 
@@ -50,9 +50,9 @@ async function createTask(): Promise<void> {
         @keydown.enter.stop="createTask"
       />
     </div>
-    <div v-if="rootTasks.length === 0" class="muted empty">
+    <UiInfo v-if="rootTasks.length === 0" class="empty">
       No tasks yet.
-    </div>
+    </UiInfo>
     <TaskRow v-for="t in rootTasks" :key="t.id" :task="t" />
   </div>
 </template>
@@ -62,5 +62,5 @@ async function createTask(): Promise<void> {
 .add-row { padding: 8px; border-bottom: 1px solid var(--border); }
 .add-input { width: 100%; }
 .add-input :deep(.p-inputtext) { width: 100%; }
-.empty { padding: 16px 8px; }
+.empty { margin: 8px; }
 </style>

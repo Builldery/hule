@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import type { ViewMode } from '../classes/GanttWindowCalculator'
 import {
+  UiInfo,
   UiPopover,
   UiPopoverTrigger,
   UiPopoverPanel,
@@ -38,10 +40,14 @@ const visibleTasks = computed<Task[]>(() =>
 const mount = ref<HTMLDivElement | null>(null)
 const popoverRef = ref<{ open: () => void } | null>(null)
 
+const viewMode = ref<ViewMode>('Week')
+const snapUnit = computed<'hour' | 'day'>(() => viewMode.value === 'Days3' ? 'hour' : 'day')
+
 let suppressNextSync = false
 const visTl = useVisTimeline({
   mountRef: mount,
-  window: windowForMode('Week', new Date()),
+  window: windowForMode(viewMode.value, new Date()),
+  snapUnit,
   onItemMove: async (id, start, end) => {
     suppressNextSync = true
     await tasksStore.update(id, {
@@ -54,7 +60,7 @@ const visTl = useVisTimeline({
   },
 })
 
-const { viewMode, viewModes, goToday, fitAll } = useGanttViewMode(visTl.timeline)
+const { viewModes, goToday, fitAll } = useGanttViewMode(visTl.timeline, viewMode)
 
 const { install: installTodayMarker } = useTodayMarker(visTl.timeline, mount)
 
@@ -74,6 +80,7 @@ const ghost = useGanttGhostBar({
 // `UiPopoverTrigger` anchor is kept invisible, serving only as a positioning
 // target for the popover panel.
 function onMountClick(e: MouseEvent): void {
+  if (quickAdd.popoverOpen.value) return
   if (!ghost.ghostVisible.value || !ghost.ghostDay.value) return
   const target = e.target as HTMLElement | null
   if (!target) return
@@ -128,9 +135,9 @@ watch(visibleTasks, () => {
       @today="goToday"
       @fit="fitAll"
     />
-    <div v-if="visibleTasks.length === 0" class="empty muted">
+    <UiInfo v-if="visibleTasks.length === 0" class="gantt-empty">
       No scheduled tasks in this list. Set Start date and Due date on a task to see it here.
-    </div>
+    </UiInfo>
     <div ref="mount" class="vis-mount">
       <div
         v-show="ghost.ghostVisible.value"
@@ -188,12 +195,15 @@ watch(visibleTasks, () => {
   height: 100%;
   min-height: 0;
 }
-.empty { padding: 32px 16px; }
+.gantt-empty { margin: 16px; }
 .vis-mount {
   flex: 1;
   min-height: 0;
   min-width: 0;
   position: relative;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  background: #fff;
 }
 </style>
 

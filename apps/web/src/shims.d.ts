@@ -45,7 +45,9 @@ declare module '@buildery/ui-kit/components' {
   export const UiPopoverPanel: AnyComp
   export const UiSpinner: AnyComp
   export const UiIcon: AnyComp
+  export const UiLetterIcon: AnyComp
   export const UiTag: AnyComp
+  export const UiInfo: AnyComp
   export const UiCard: AnyComp
   export const UiTabSet: AnyComp
   export const UiTab: AnyComp
