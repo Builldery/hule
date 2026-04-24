@@ -1,13 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class AttachmentDto {
-  @ApiProperty() fileId: string;
+  @ApiProperty() storageKey: string;
   @ApiProperty() filename: string;
   @ApiProperty() mime: string;
   @ApiProperty() size: number;
 
   constructor(raw: AttachmentDto | any) {
-    this.fileId = raw?.fileId?.toString();
+    this.storageKey = raw?.storageKey ?? '';
     this.filename = raw?.filename;
     this.mime = raw?.mime;
     this.size = raw?.size;

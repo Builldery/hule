@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { R2Module } from '../r2/r2.module';
 import { RestApiAuthModule } from './auth/rest-api-auth.module';
 import { RestApiHealthModule } from './health/rest-api-health.module';
 import { RestApiWorkspaceModule } from './workspace/rest-api-workspace.module';
@@ -12,8 +13,16 @@ import { RestApiFileModule } from './file/rest-api-file.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(process.env.MONGO_URL ?? 'mongodb://mongo:27017/hule'),
+    MongooseModule.forRootAsync({
+      useFactory: () => ({
+        uri: process.env.MONGO_URL ?? 'mongodb://mongo:27017/hule',
+        onConnectionCreate: (connection) => {
+          connection.once('connected', () => console.log('\x1b[32m🍃 🍃 MongoDB connected successfully 🍃 🍃\x1b[0m',));
+        },
+      }),
+    }),
 
+    R2Module,
     RestApiAuthModule,
     RestApiHealthModule,
     RestApiWorkspaceModule,

@@ -12,6 +12,7 @@ import {
 } from '../../../adapters/mongo/comment.schema';
 import { Task } from '../../../adapters/mongo/task.schema';
 import { GridfsService } from '../../../adapters/gridfs/gridfs.service';
+import { R2Service } from '../../../adapters/r2/r2.service';
 import { CommentDto } from '../../entity/comment/comment.dto';
 
 function toOid(id: string): Types.ObjectId {
@@ -23,7 +24,10 @@ export class CommentService {
   @InjectModel(Comment.name) private commentModel: Model<CommentDocument>;
   @InjectModel(Task.name) private taskModel: Model<Task>;
 
-  constructor(private readonly gridfs: GridfsService) {}
+  constructor(
+    private readonly gridfs: GridfsService,
+    private readonly r2: R2Service,
+  ) {}
 
   async getByTaskId(wsId: string, taskId: string): Promise<Array<CommentDto>> {
     const wsOid = toOid(wsId);
@@ -48,7 +52,9 @@ export class CommentService {
 
     let body: string | undefined;
     const attachments: Array<{
-      fileId: Types.ObjectId;
+      fileId?: Types.ObjectId;
+      storage?: 'gridfs' | 'r2';
+      storageKey?: string;
       filename: string;
       mime: string;
       size: number;
@@ -64,18 +70,36 @@ export class CommentService {
           const chunks: Array<Buffer> = [];
           for await (const c of part.file) chunks.push(c as Buffer);
           const buf = Buffer.concat(chunks);
-          const fileId = await this.gridfs.upload(
-            part.filename,
-            part.mimetype,
-            buf,
-            { workspaceId: wsOid },
-          );
-          attachments.push({
-            fileId: fileId as unknown as Types.ObjectId,
-            filename: part.filename,
-            mime: part.mimetype,
-            size: buf.length,
-          });
+
+          if (this.r2.isConfigured()) {
+            const key = await this.r2.upload(
+              part.filename,
+              part.mimetype,
+              buf,
+              { workspaceId: wsOid.toHexString() },
+            );
+            attachments.push({
+              storage: 'r2',
+              storageKey: key,
+              filename: part.filename,
+              mime: part.mimetype,
+              size: buf.length,
+            });
+          } else {
+            const fileId = await this.gridfs.upload(
+              part.filename,
+              part.mimetype,
+              buf,
+              { workspaceId: wsOid },
+            );
+            attachments.push({
+              storage: 'gridfs',
+              fileId: fileId as unknown as Types.ObjectId,
+              filename: part.filename,
+              mime: part.mimetype,
+              size: buf.length,
+            });
+          }
         }
       }
     } else {
@@ -104,9 +128,17 @@ export class CommentService {
     if (!doc) return;
     await this.commentModel.deleteOne({ _id: oid, workspaceId: wsOid });
     await Promise.all(
-      (doc.attachments ?? []).map((a) =>
-        this.gridfs.delete(a.fileId as unknown as import('mongodb').ObjectId),
-      ),
+      (doc.attachments ?? []).map((a) => {
+        if (a.storage === 'r2' && a.storageKey) {
+          return this.r2.delete(a.storageKey);
+        }
+        if (a.fileId) {
+          return this.gridfs.delete(
+            a.fileId as unknown as import('mongodb').ObjectId,
+          );
+        }
+        return Promise.resolve();
+      }),
     );
   }
 }

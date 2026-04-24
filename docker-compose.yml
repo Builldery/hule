@@ -18,8 +18,23 @@ services:
       MONGO_URL: mongodb://mongo:27017/hule
       PORT: "3000"
       LOG_LEVEL: info
-      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-30d}
+      JWT_SECRET: "dev-secret-change-me"
+      JWT_EXPIRES_IN: "30d"
+      R2_ACCOUNT_ID: "b1fd9dfdf3a39e086d30c877e12d34ff"
+      R2_ACCESS_KEY_ID: "b6d1c38f5f50c3d95e3e46d3ecd6d6da"
+      R2_SECRET_ACCESS_KEY: "4cd6a939ad48ff73909a669a2d3a5f349808dc01476d7ad00afc65917dc8ea33"
+      R2_BUCKET: "hule"
+      CHOKIDAR_USEPOLLING: "true"
+      TSC_WATCHFILE: "DynamicPriorityPolling"
+      TSC_WATCHDIRECTORY: "DynamicPriorityPolling"
+    volumes:
+      - ./apps/api:/repo/apps/api
+      - /repo/apps/api/node_modules
+      - ./libs:/repo/libs
+      - /repo/libs/types/node_modules
+      - /repo/libs/utils/node_modules
+      - ./tsconfig.base.json:/repo/tsconfig.base.json
+      - ./tsconfig.json:/repo/tsconfig.json
     depends_on:
       mongo:
         condition: service_healthy

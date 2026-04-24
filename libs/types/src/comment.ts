@@ -1,7 +1,7 @@
 import type { IsoDateString } from './common'
 
 export interface Attachment {
-  fileId: string
+  storageKey: string
   filename: string
   mime: string
   size: number

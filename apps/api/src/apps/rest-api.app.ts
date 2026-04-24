@@ -87,6 +87,9 @@ export class RestApiApp {
 
   async listen(): Promise<this> {
     await this.app.listen({ port: this.PORT, host: '0.0.0.0' });
+    console.log(
+      `\x1b[32m🌐 🌐 REST API app started successfully on port ${this.PORT} 🌐 🌐\x1b[0m`,
+    );
     return this;
   }
 }
