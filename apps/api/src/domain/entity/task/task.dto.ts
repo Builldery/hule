@@ -15,6 +15,9 @@ export class TaskDto {
   @ApiProperty() depth: number;
   @ApiProperty({ type: [String] }) path: Array<string>;
   @ApiProperty({ nullable: true }) assigneeId: string | null;
+  @ApiProperty({ type: [String] }) tagIds: Array<string>;
+  @ApiProperty({ required: false }) timeEstimate?: number;
+  @ApiProperty({ required: false }) trackedTime?: number;
   @ApiProperty() createdAt: string;
   @ApiProperty() updatedAt: string;
 
@@ -32,6 +35,9 @@ export class TaskDto {
     this.depth = raw?.depth ?? 0;
     this.path = Array.isArray(raw?.path) ? raw.path.map((p: any) => p.toString()) : [];
     this.assigneeId = raw?.assigneeId ? raw.assigneeId.toString() : null;
+    this.tagIds = Array.isArray(raw?.tagIds) ? raw.tagIds.map((t: any) => t.toString()) : [];
+    this.timeEstimate = raw?.timeEstimate ?? undefined;
+    this.trackedTime = raw?.trackedTime ?? undefined;
     this.createdAt = raw?.createdAt instanceof Date ? raw.createdAt.toISOString() : raw?.createdAt;
     this.updatedAt = raw?.updatedAt instanceof Date ? raw.updatedAt.toISOString() : raw?.updatedAt;
   }

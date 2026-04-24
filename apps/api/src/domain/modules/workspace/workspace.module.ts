@@ -8,6 +8,7 @@ import { WorkspaceService } from './workspace.service';
 import { UserModule } from '../user/user.module';
 import { SpaceModule } from '../space/space.module';
 import { FileModule } from '../file/file.module';
+import { TagModule } from '../tag/tag.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { FileModule } from '../file/file.module';
     UserModule,
     SpaceModule,
     FileModule,
+    TagModule,
   ],
   providers: [WorkspaceService],
   exports: [WorkspaceService],

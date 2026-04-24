@@ -19,6 +19,7 @@ import {
 } from '../../entity/task/tasks-list-query.dto';
 import { TimelineQueryDto } from '../../entity/task/timeline-query.dto';
 import { ETaskPriority } from '../../entity/task/task.constants';
+import { TagService } from '../tag/tag.service';
 
 function toOid(id: string): Types.ObjectId {
   return new Types.ObjectId(id);
@@ -30,6 +31,8 @@ export class TaskService {
   @InjectModel(Comment.name) private commentModel: Model<Comment>;
   @InjectModel(List.name) private listModel: Model<List>;
   @InjectModel(Workspace.name) private workspaceModel: Model<Workspace>;
+
+  constructor(private readonly tagService: TagService) {}
 
   async getByListQuery(
     wsId: string,
@@ -130,6 +133,11 @@ export class TaskService {
       await this.assertAssigneeMember(wsOid, toOid(dto.assigneeId));
     }
 
+    const tagOids = (dto.tagIds ?? []).map(toOid);
+    if (tagOids.length) {
+      await this.tagService.assertTagsInWorkspace(wsOid, tagOids);
+    }
+
     const lastByOrder = await this.taskModel
       .findOne({ workspaceId: wsOid, listId: listOid, parentId: parentOid })
       .sort({ order: -1 });
@@ -149,6 +157,9 @@ export class TaskService {
       depth,
       path,
       assigneeId: dto.assigneeId ? toOid(dto.assigneeId) : null,
+      tagIds: tagOids,
+      timeEstimate: dto.timeEstimate,
+      trackedTime: dto.trackedTime,
     });
     return new TaskDto(doc);
   }
@@ -162,6 +173,12 @@ export class TaskService {
     if (patch.assigneeId !== undefined && patch.assigneeId !== null) {
       await this.assertAssigneeMember(wsOid, toOid(patch.assigneeId));
     }
+    const tagOids = Array.isArray(patch.tagIds)
+      ? patch.tagIds.map(toOid)
+      : undefined;
+    if (tagOids && tagOids.length) {
+      await this.tagService.assertTagsInWorkspace(wsOid, tagOids);
+    }
     const $set: Record<string, unknown> = {};
     const $unset: Record<string, ''> = {};
     for (const [k, v] of Object.entries(patch)) {
@@ -171,6 +188,7 @@ export class TaskService {
       } else if (v !== undefined) {
         if (k === 'startDate' || k === 'dueDate') $set[k] = new Date(v as string);
         else if (k === 'assigneeId') $set[k] = toOid(v as string);
+        else if (k === 'tagIds') $set[k] = tagOids;
         else $set[k] = v;
       }
     }

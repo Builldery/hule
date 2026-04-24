@@ -8,6 +8,7 @@ import {
   WorkspaceSchema,
 } from '../../../adapters/mongo/workspace.schema';
 import { TaskService } from './task.service';
+import { TagModule } from '../tag/tag.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { TaskService } from './task.service';
       { name: List.name, schema: ListSchema },
       { name: Workspace.name, schema: WorkspaceSchema },
     ]),
+    TagModule,
   ],
   providers: [TaskService],
   exports: [TaskService],

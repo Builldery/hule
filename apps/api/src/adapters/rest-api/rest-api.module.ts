@@ -6,6 +6,7 @@ import { RestApiWorkspaceModule } from './workspace/rest-api-workspace.module';
 import { RestApiSpaceModule } from './space/rest-api-space.module';
 import { RestApiListModule } from './list/rest-api-list.module';
 import { RestApiTaskModule } from './task/rest-api-task.module';
+import { RestApiTagModule } from './tag/rest-api-tag.module';
 import { RestApiCommentModule } from './comment/rest-api-comment.module';
 import { RestApiFileModule } from './file/rest-api-file.module';
 
@@ -19,6 +20,7 @@ import { RestApiFileModule } from './file/rest-api-file.module';
     RestApiSpaceModule,
     RestApiListModule,
     RestApiTaskModule,
+    RestApiTagModule,
     RestApiCommentModule,
     RestApiFileModule,
   ],

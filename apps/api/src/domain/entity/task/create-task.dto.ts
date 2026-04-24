@@ -1,12 +1,16 @@
 import {ApiProperty} from '@nestjs/swagger';
 import {
+    ArrayUnique,
+    IsArray,
     IsDateString,
     IsEnum,
+    IsInt,
     IsMongoId,
     IsNotEmpty,
     IsOptional,
     IsString,
     MaxLength,
+    Min,
     MinLength,
     ValidateIf,
 } from 'class-validator';
@@ -47,4 +51,16 @@ export class CreateTaskDto {
     @ValidateIf((_o, v) => v !== null && v !== undefined)
     @IsMongoId()
     assigneeId?: string | null;
+
+    @ApiProperty({required: false, type: [String]})
+    @IsOptional() @IsArray() @ArrayUnique() @IsMongoId({each: true})
+    tagIds?: Array<string>;
+
+    @ApiProperty({required: false})
+    @IsOptional() @IsInt() @Min(0)
+    timeEstimate?: number;
+
+    @ApiProperty({required: false})
+    @IsOptional() @IsInt() @Min(0)
+    trackedTime?: number;
 }

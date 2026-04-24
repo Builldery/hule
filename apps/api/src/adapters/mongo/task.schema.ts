@@ -41,6 +41,16 @@ export class Task {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null })
   assigneeId: mongoose.Types.ObjectId | null;
+
+  @Prop({
+    required: true,
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }],
+    default: [],
+  })
+  tagIds: Array<mongoose.Types.ObjectId>;
+
+  @Prop({ type: Number, min: 0 }) timeEstimate?: number;
+  @Prop({ type: Number, min: 0 }) trackedTime?: number;
 }
 
 export type TaskDocument = Task & Document;
@@ -52,3 +62,4 @@ TaskSchema.index({ path: 1 });
 TaskSchema.index({ startDate: 1, dueDate: 1 });
 TaskSchema.index({ assigneeId: 1 });
 TaskSchema.index({ workspaceId: 1 });
+TaskSchema.index({ tagIds: 1 });

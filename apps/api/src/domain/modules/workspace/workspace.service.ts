@@ -16,6 +16,7 @@ import { UpdateWorkspaceDto } from '../../entity/workspace/update-workspace.dto'
 import { UserService } from '../user/user.service';
 import { SpaceService } from '../space/space.service';
 import { FileService } from '../file/file.service';
+import { TagService } from '../tag/tag.service';
 
 function toOid(id: string): Types.ObjectId {
   return new Types.ObjectId(id);
@@ -30,6 +31,7 @@ export class WorkspaceService {
     private readonly userService: UserService,
     private readonly spaceService: SpaceService,
     private readonly fileService: FileService,
+    private readonly tagService: TagService,
   ) {}
 
   async create(ownerId: string, dto: CreateWorkspaceDto): Promise<WorkspaceDto> {
@@ -78,6 +80,7 @@ export class WorkspaceService {
     const wsOid = doc._id as Types.ObjectId;
     await this.spaceService.deleteByWorkspaceId(wsOid);
     await this.fileService.deleteByWorkspaceId(wsOid);
+    await this.tagService.deleteByWorkspaceId(wsOid);
     await this.workspaceModel.deleteOne({ _id: wsOid });
   }
 
