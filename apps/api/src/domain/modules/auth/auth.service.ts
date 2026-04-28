@@ -27,7 +27,6 @@ export class AuthService {
     if (!dto?.password) throw new BadRequestException('Password required');
     const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
     const doc = await this.userService.create({
-      username: dto.username,
       email: dto.email,
       name: dto.name,
       passwordHash,
@@ -40,7 +39,7 @@ export class AuthService {
   }
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
-    const doc = await this.userService.findByLogin(dto.login);
+    const doc = await this.userService.findByEmail(dto.email);
     if (!doc) throw new UnauthorizedException('Invalid credentials');
     const ok = await bcrypt.compare(dto.password, doc.password);
     if (!ok) throw new UnauthorizedException('Invalid credentials');
@@ -64,7 +63,6 @@ export class AuthService {
     const payload: JwtPayload = {
       sub: user.id,
       id: user.id,
-      username: user.username,
       email: user.email,
       name: user.name,
       workspaceIds,

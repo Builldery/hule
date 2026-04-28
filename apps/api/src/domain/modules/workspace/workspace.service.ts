@@ -87,10 +87,10 @@ export class WorkspaceService {
   async addMember(
     wsId: string,
     actorId: string,
-    login: string,
+    email: string,
   ): Promise<WorkspaceDto> {
     const doc = await this.loadAsOwner(wsId, actorId);
-    const invitee = await this.userService.findByLogin(login);
+    const invitee = await this.userService.findByEmail(email);
     if (!invitee) throw new NotFoundException('User not found');
     const inviteeOid = invitee._id as Types.ObjectId;
     if (doc.memberIds.some((m) => m.toHexString() === inviteeOid.toHexString())) {

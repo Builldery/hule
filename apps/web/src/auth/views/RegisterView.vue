@@ -12,20 +12,15 @@ const router = useRouter()
 const authStore = useAuthStore()
 const workspacesStore = useWorkspacesStore()
 
-const username = ref('')
 const email = ref('')
 const name = ref('')
 const password = ref('')
 const submitting = ref(false)
 const formError = ref<string | null>(null)
 
-const USERNAME_RE = /^[a-zA-Z0-9_]+$/
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function validate(): string | null {
-  const u = username.value.trim()
-  if (u.length < 3 || u.length > 32) return 'Username must be 3-32 characters'
-  if (!USERNAME_RE.test(u)) return 'Username: letters, digits, underscore only'
   const e = email.value.trim()
   if (!EMAIL_RE.test(e) || e.length > 254) return 'Enter a valid email'
   const n = name.value.trim()
@@ -54,7 +49,6 @@ async function onSubmit(): Promise<void> {
   submitting.value = true
   try {
     await authStore.register({
-      username: username.value.trim(),
       email: email.value.trim(),
       name: name.value.trim(),
       password: password.value,
@@ -79,18 +73,11 @@ async function onSubmit(): Promise<void> {
   <AuthLayout title="Create account" subtitle="Set up your Hule workspace">
     <form class="auth-form" @submit.prevent="onSubmit">
       <UiInput
-        label="Username"
-        :value="username"
-        placeholder="john_doe"
-        autofocus
-        :disabled="submitting"
-        @update:value="(v: unknown) => (username = String(v ?? ''))"
-      />
-      <UiInput
         label="Email"
         type="email"
         :value="email"
         placeholder="you@example.com"
+        autofocus
         :disabled="submitting"
         @update:value="(v: unknown) => (email = String(v ?? ''))"
       />

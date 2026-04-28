@@ -1,10 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsEmail, MaxLength } from 'class-validator';
 
 export class InviteMemberDto {
-  @ApiProperty({ description: 'Username or email of an existing user' })
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({ description: 'Email of an existing user' })
+  @IsEmail()
   @MaxLength(254)
-  login: string;
+  email: string;
 }

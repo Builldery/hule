@@ -13,27 +13,19 @@ export class UserService {
   @InjectModel(User.name) private userModel: Model<UserDocument>;
 
   async create(data: {
-    username: string;
     email: string;
     name: string;
     passwordHash: string;
   }): Promise<UserDocument> {
-    const username = data.username.trim();
     const email = data.email.trim().toLowerCase();
 
-    const existing = await this.userModel
-      .findOne({ $or: [{ username }, { email }] })
-      .lean();
+    const existing = await this.userModel.findOne({ email }).lean();
     if (existing) {
-      if (existing.username === username) {
-        throw new BadRequestException('Username already taken');
-      }
       throw new BadRequestException('Email already taken');
     }
 
     try {
       return await this.userModel.create({
-        username,
         email,
         name: data.name,
         password: data.passwordHash,
@@ -47,11 +39,9 @@ export class UserService {
     }
   }
 
-  async findByLogin(login: string): Promise<UserDocument | null> {
-    const value = login.trim();
-    return this.userModel
-      .findOne({ $or: [{ username: value }, { email: value.toLowerCase() }] })
-      .exec();
+  async findByEmail(email: string): Promise<UserDocument | null> {
+    const value = email.trim().toLowerCase();
+    return this.userModel.findOne({ email: value }).exec();
   }
 
   async findById(id: string): Promise<UserDto> {

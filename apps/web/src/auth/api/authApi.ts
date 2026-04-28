@@ -2,7 +2,6 @@ import { http } from '@/app/api/httpClient'
 
 export interface User {
   id: string
-  username: string
   email: string
   name: string
   createdAt: string
@@ -10,12 +9,11 @@ export interface User {
 }
 
 export interface LoginPayload {
-  login: string
+  email: string
   password: string
 }
 
 export interface RegisterPayload {
-  username: string
   email: string
   name: string
   password: string
