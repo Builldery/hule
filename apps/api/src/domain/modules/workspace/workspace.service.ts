@@ -17,6 +17,9 @@ import { UserService } from '../user/user.service';
 import { SpaceService } from '../space/space.service';
 import { FileService } from '../file/file.service';
 import { TagService } from '../tag/tag.service';
+import { RecurringJobService } from '../recurring-job/recurring-job.service';
+import { ActionService } from '../action/action.service';
+import { runBulk } from '../../../adapters/mongo/dispatch-context';
 
 function toOid(id: string): Types.ObjectId {
   return new Types.ObjectId(id);
@@ -32,6 +35,8 @@ export class WorkspaceService {
     private readonly spaceService: SpaceService,
     private readonly fileService: FileService,
     private readonly tagService: TagService,
+    private readonly recurringJobService: RecurringJobService,
+    private readonly actionService: ActionService,
   ) {}
 
   async create(ownerId: string, dto: CreateWorkspaceDto): Promise<WorkspaceDto> {
@@ -78,19 +83,23 @@ export class WorkspaceService {
   async delete(wsId: string, actorId: string): Promise<void> {
     const doc = await this.loadAsOwner(wsId, actorId);
     const wsOid = doc._id as Types.ObjectId;
-    await this.spaceService.deleteByWorkspaceId(wsOid);
-    await this.fileService.deleteByWorkspaceId(wsOid);
-    await this.tagService.deleteByWorkspaceId(wsOid);
-    await this.workspaceModel.deleteOne({ _id: wsOid });
+    await runBulk(async () => {
+      await this.actionService.deleteByWorkspaceId(wsOid);
+      await this.recurringJobService.deleteByWorkspaceId(wsOid);
+      await this.spaceService.deleteByWorkspaceId(wsOid);
+      await this.fileService.deleteByWorkspaceId(wsOid);
+      await this.tagService.deleteByWorkspaceId(wsOid);
+      await this.workspaceModel.deleteOne({ _id: wsOid });
+    });
   }
 
   async addMember(
     wsId: string,
     actorId: string,
-    login: string,
+    email: string,
   ): Promise<WorkspaceDto> {
     const doc = await this.loadAsOwner(wsId, actorId);
-    const invitee = await this.userService.findByLogin(login);
+    const invitee = await this.userService.findByEmail(email);
     if (!invitee) throw new NotFoundException('User not found');
     const inviteeOid = invitee._id as Types.ObjectId;
     if (doc.memberIds.some((m) => m.toHexString() === inviteeOid.toHexString())) {

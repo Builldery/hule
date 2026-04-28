@@ -36,8 +36,8 @@ export const workspacesApi = {
   remove: (id: string) =>
     http<void>(`/api/workspaces/${id}`, { method: 'DELETE' }),
 
-  addMember: (id: string, login: string) =>
-    http<Workspace>(`/api/workspaces/${id}/members`, { method: 'POST', body: JSON.stringify({ login }) }),
+  addMember: (id: string, email: string) =>
+    http<Workspace>(`/api/workspaces/${id}/members`, { method: 'POST', body: JSON.stringify({ email }) }),
 
   removeMember: (id: string, memberId: string) =>
     http<Workspace>(`/api/workspaces/${id}/members/${memberId}`, { method: 'DELETE' }),

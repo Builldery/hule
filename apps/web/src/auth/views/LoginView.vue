@@ -13,7 +13,7 @@ const route = useRoute()
 const authStore = useAuthStore()
 const workspacesStore = useWorkspacesStore()
 
-const login = ref('')
+const email = ref('')
 const password = ref('')
 const submitting = ref(false)
 const formError = ref<string | null>(null)
@@ -30,19 +30,19 @@ function readMessage(body: unknown, fallback: string): string {
 async function onSubmit(): Promise<void> {
   if (submitting.value) return
   formError.value = null
-  if (!login.value.trim() || !password.value) {
-    formError.value = 'Enter login and password'
+  if (!email.value.trim() || !password.value) {
+    formError.value = 'Enter email and password'
     return
   }
   submitting.value = true
   try {
-    await authStore.login({ login: login.value.trim(), password: password.value })
+    await authStore.login({ email: email.value.trim(), password: password.value })
     await workspacesStore.load(true)
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
     await router.replace(redirect)
   } catch (err) {
     if (err instanceof HttpError) {
-      formError.value = readMessage(err.body, 'Invalid login or password')
+      formError.value = readMessage(err.body, 'Invalid email or password')
     } else {
       formError.value = 'Failed to sign in'
     }
@@ -57,12 +57,13 @@ async function onSubmit(): Promise<void> {
   <AuthLayout title="Sign in" subtitle="Welcome back to Hule">
     <form class="auth-form" @submit.prevent="onSubmit">
       <UiInput
-        label="Username or email"
-        :value="login"
-        placeholder="your_login"
+        label="Email"
+        type="email"
+        :value="email"
+        placeholder="you@example.com"
         autofocus
         :disabled="submitting"
-        @update:value="(v: unknown) => (login = String(v ?? ''))"
+        @update:value="(v: unknown) => (email = String(v ?? ''))"
       />
       <UiInputPassword
         v-model="password"

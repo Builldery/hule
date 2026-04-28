@@ -8,6 +8,10 @@ import { CreateSpaceDto } from '../../entity/space/create-space.dto';
 import { UpdateSpaceDto } from '../../entity/space/update-space.dto';
 import { ReorderItemDto } from '../../entity/common/reorder.dto';
 import { ListService } from '../list/list.service';
+import { TaskTemplateService } from '../task-template/task-template.service';
+import { RecurringJobService } from '../recurring-job/recurring-job.service';
+import { ActionService } from '../action/action.service';
+import { runBulk } from '../../../adapters/mongo/dispatch-context';
 
 function toOid(id: string): Types.ObjectId {
   return new Types.ObjectId(id);
@@ -18,7 +22,12 @@ export class SpaceService {
   @InjectModel(Space.name) private spaceModel: Model<SpaceDocument>;
   @InjectModel(List.name) private listModel: Model<List>;
 
-  constructor(private readonly listService: ListService) {}
+  constructor(
+    private readonly listService: ListService,
+    private readonly taskTemplateService: TaskTemplateService,
+    private readonly recurringJobService: RecurringJobService,
+    private readonly actionService: ActionService,
+  ) {}
 
   async getAll(wsId: string): Promise<Array<SpaceDto>> {
     const docs = await this.spaceModel
@@ -61,12 +70,17 @@ export class SpaceService {
     const oid = toOid(id);
     const existed = await this.spaceModel.findOne({ _id: oid, workspaceId: wsOid });
     if (!existed) throw new NotFoundException('Space not found');
-    const lists = await this.listModel
-      .find({ spaceId: oid, workspaceId: wsOid })
-      .select({ _id: 1 });
-    const listIds = lists.map((l) => l._id as Types.ObjectId);
-    await this.spaceModel.deleteOne({ _id: oid, workspaceId: wsOid });
-    await this.listService.deleteBySpaceId(wsOid, oid, listIds);
+    await runBulk(async () => {
+      const lists = await this.listModel
+        .find({ spaceId: oid, workspaceId: wsOid })
+        .select({ _id: 1 });
+      const listIds = lists.map((l) => l._id as Types.ObjectId);
+      await this.actionService.deleteBySpaceId(wsOid, oid);
+      await this.recurringJobService.deleteBySpaceId(wsOid, oid);
+      await this.spaceModel.deleteOne({ _id: oid, workspaceId: wsOid });
+      await this.listService.deleteBySpaceId(wsOid, oid, listIds);
+      await this.taskTemplateService.deleteBySpaceId(wsOid, oid);
+    });
   }
 
   async reorder(wsId: string, items: Array<ReorderItemDto>): Promise<void> {
@@ -83,6 +97,7 @@ export class SpaceService {
 
   async deleteByWorkspaceId(wsId: Types.ObjectId): Promise<void> {
     await this.listService.deleteByWorkspaceId(wsId);
+    await this.taskTemplateService.deleteByWorkspaceId(wsId);
     await this.spaceModel.deleteMany({ workspaceId: wsId });
   }
 }

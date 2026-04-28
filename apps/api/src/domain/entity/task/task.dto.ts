@@ -18,6 +18,7 @@ export class TaskDto {
   @ApiProperty({ type: [String] }) tagIds: Array<string>;
   @ApiProperty({ required: false }) timeEstimate?: number;
   @ApiProperty({ required: false }) trackedTime?: number;
+  @ApiProperty({ nullable: true }) spawnedFromTemplateId: string | null;
   @ApiProperty() createdAt: string;
   @ApiProperty() updatedAt: string;
 
@@ -38,6 +39,9 @@ export class TaskDto {
     this.tagIds = Array.isArray(raw?.tagIds) ? raw.tagIds.map((t: any) => t.toString()) : [];
     this.timeEstimate = raw?.timeEstimate ?? undefined;
     this.trackedTime = raw?.trackedTime ?? undefined;
+    this.spawnedFromTemplateId = raw?.spawnedFromTemplateId
+      ? raw.spawnedFromTemplateId.toString()
+      : null;
     this.createdAt = raw?.createdAt instanceof Date ? raw.createdAt.toISOString() : raw?.createdAt;
     this.updatedAt = raw?.updatedAt instanceof Date ? raw.updatedAt.toISOString() : raw?.updatedAt;
   }

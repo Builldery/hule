@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
 import { ETaskPriority } from '../../domain/entity/task/task.constants';
+import { taskEventsBus } from './task-events.bus';
+import { isBulk } from './dispatch-context';
 
 @Schema({ collection: 'tasks', timestamps: true })
 export class Task {
@@ -51,6 +53,13 @@ export class Task {
 
   @Prop({ type: Number, min: 0 }) timeEstimate?: number;
   @Prop({ type: Number, min: 0 }) trackedTime?: number;
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'TaskTemplate',
+    default: null,
+  })
+  spawnedFromTemplateId: mongoose.Types.ObjectId | null;
 }
 
 export type TaskDocument = Task & Document;
@@ -63,3 +72,25 @@ TaskSchema.index({ startDate: 1, dueDate: 1 });
 TaskSchema.index({ assigneeId: 1 });
 TaskSchema.index({ workspaceId: 1 });
 TaskSchema.index({ tagIds: 1 });
+TaskSchema.index({ spawnedFromTemplateId: 1 });
+
+TaskSchema.pre('findOneAndUpdate', async function () {
+  const q = this as unknown as {
+    model: mongoose.Model<unknown>;
+    getQuery: () => Record<string, unknown>;
+    _beforeDoc?: unknown;
+  };
+  q._beforeDoc = await q.model.findOne(q.getQuery()).lean();
+});
+
+TaskSchema.post('findOneAndUpdate', function (doc: any) {
+  if (!doc) return;
+  const q = this as unknown as { _beforeDoc?: any };
+  const after = typeof doc.toObject === 'function' ? doc.toObject() : doc;
+  taskEventsBus.emitAfterUpdate({
+    workspaceId: doc.workspaceId.toString(),
+    before: q._beforeDoc ?? null,
+    after,
+    isBulk: isBulk(),
+  });
+});

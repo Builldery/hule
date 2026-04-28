@@ -34,7 +34,7 @@ export class GridfsService implements OnModuleInit {
       const uploadStream = this.bucket().openUploadStream(filename, {
         contentType: mime,
         metadata,
-      });
+      } as any);
       Readable.from(buffer)
         .pipe(uploadStream)
         .on('error', reject)

@@ -83,7 +83,7 @@ export class RestApiWorkspaceController {
     @Param() params: WorkspaceIdParamsDto,
     @Body() dto: InviteMemberDto,
   ): Promise<WorkspaceDto> {
-    return this.workspaceService.addMember(params.workspaceId, user.id, dto.login);
+    return this.workspaceService.addMember(params.workspaceId, user.id, dto.email);
   }
 
   @ApiResponse({ type: WorkspaceDto })
