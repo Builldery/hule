@@ -84,7 +84,7 @@ async function logout(): Promise<void> {
             :key="m.value"
             :value="m.value"
             :label="m.label"
-            size="small"
+           
           />
         </UiRadioGroup>
       </UiButtonGroup>
@@ -93,7 +93,7 @@ async function logout(): Promise<void> {
     <div class="topbar-user">
       <UiPopover v-if="user" direction="below" :close-on-content-click="false">
         <UiPopoverTrigger class="user-trigger">
-          <UiLetterIcon :letters="initials" color="blue" size="small" />
+          <UiLetterIcon :letters="initials" color="blue" />
         </UiPopoverTrigger>
         <UiPopoverPanel>
           <UiCard class="user-card ui--single-card">
@@ -104,7 +104,7 @@ async function logout(): Promise<void> {
                 label="Logout"
                 fill="tonal"
                 color="gray"
-                size="small"
+               
                 class="logout-btn"
                 @click="logout"
               />

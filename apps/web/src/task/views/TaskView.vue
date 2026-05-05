@@ -2,7 +2,9 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
-  UiButton,
+  UiDate,
+  UiIcon,
+  UiIconButton,
   UiInfo,
   UiInput,
   UiCombobox,
@@ -11,12 +13,13 @@ import {
   UiTreeView,
 } from '@buildery/ui-kit/components'
 import Textarea from 'primevue/textarea'
-import DatePicker from 'primevue/datepicker'
 import { useSpacesStore } from '@/space/store/useSpacesStore'
 import { useListsStore } from '@/list/store/useListsStore'
 import { useTasksStore } from '@/task/store/useTasksStore'
+import { useTagsStore } from '@/tag/store/useTagsStore'
 import { STATUS_OPTIONS, PRIORITY_OPTIONS, statusMeta, priorityMeta } from '@/task/constants/tasks'
 import TaskTreeNode from '@/task/components/TaskTreeNode.vue'
+import TaskTagsField from '@/tag/components/TaskTagsField.vue'
 import CommentsFeed from '@/comment/components/CommentsFeed.vue'
 
 const props = defineProps<{
@@ -31,6 +34,7 @@ const props = defineProps<{
 const spacesStore = useSpacesStore()
 const listsStore = useListsStore()
 const tasksStore = useTasksStore()
+const tagsStore = useTagsStore()
 const router = useRouter()
 
 const space = computed(() => spacesStore.byId[props.spaceId])
@@ -66,6 +70,7 @@ const priorityLabel = (v: string): string => priorityMeta(v).label
 onMounted(async () => {
   void spacesStore.load()
   void listsStore.loadForSpace(props.spaceId)
+  void tagsStore.load()
   await tasksStore.loadForList(props.listId)
 })
 watch(() => props.listId, async id => { await tasksStore.loadForList(id) })
@@ -94,11 +99,14 @@ async function onStatusChange(v: string): Promise<void> {
 async function onPriorityChange(v: string): Promise<void> {
   await tasksStore.update(props.taskId, { priority: v })
 }
-async function onStartDate(d: Date | null): Promise<void> {
-  await tasksStore.update(props.taskId, { startDate: d ? d.toISOString() : null })
+async function onStartDate(d: string | null): Promise<void> {
+  await tasksStore.update(props.taskId, { startDate: d })
 }
-async function onDueDate(d: Date | null): Promise<void> {
-  await tasksStore.update(props.taskId, { dueDate: d ? d.toISOString() : null })
+async function onDueDate(d: string | null): Promise<void> {
+  await tasksStore.update(props.taskId, { dueDate: d })
+}
+async function onTagsChange(v: string[]): Promise<void> {
+  await tasksStore.update(props.taskId, { tagIds: v })
 }
 
 async function addSubtask(): Promise<void> {
@@ -126,14 +134,6 @@ function back(): void {
   void router.push({ name: 'list', params: { spaceId: props.spaceId, listId: props.listId } })
 }
 
-const startDateValue = computed({
-  get: () => task.value?.startDate ? new Date(task.value.startDate) : null,
-  set: () => {},
-})
-const dueDateValue = computed({
-  get: () => task.value?.dueDate ? new Date(task.value.dueDate) : null,
-  set: () => {},
-})
 </script>
 
 <template>
@@ -145,9 +145,7 @@ const dueDateValue = computed({
         <router-link :to="{ name: 'list', params: { spaceId: props.spaceId, listId: props.listId } }">{{ list?.name }}</router-link>
       </div>
       <div class="title-row">
-        <UiButton v-if="!props.modal" size="small" fill="text" color="gray" title="Back" @click="back">
-          <i class="pi pi-arrow-left" aria-label="Back" />
-        </UiButton>
+        <UiIconButton v-if="!props.modal" fill="text" color="gray" title="Back" icon-name="ArrowLeft" @click="back" />
         <div v-if="editingTitle" class="title-input">
           <UiRawInput
             :value="titleDraft"
@@ -168,7 +166,7 @@ const dueDateValue = computed({
         <UiCombobox
           :value="task.status"
           :get-display-value="statusLabel"
-          size="small"
+         
           @update:value="onStatusChange"
         >
           <UiListboxOption
@@ -184,7 +182,7 @@ const dueDateValue = computed({
         <UiCombobox
           :value="task.priority"
           :get-display-value="priorityLabel"
-          size="small"
+         
           @update:value="onPriorityChange"
         >
           <UiListboxOption
@@ -193,7 +191,7 @@ const dueDateValue = computed({
             :value="o.value"
           >
             <span class="prio-row">
-              <i class="pi" :class="o.icon" :style="{ color: o.color }"></i>
+              <UiIcon :icon-name="o.icon" :color="o.color" width="14px" height="14px" />
               <span>{{ o.label }}</span>
             </span>
           </UiListboxOption>
@@ -201,23 +199,27 @@ const dueDateValue = computed({
       </div>
       <div class="field">
         <label>Start date</label>
-        <DatePicker
-          :model-value="startDateValue"
-          show-icon
-          show-button-bar
-          size="small"
-          @update:model-value="(v) => onStartDate(Array.isArray(v) ? (v[0] as Date | null) : (v as Date | null))"
+        <UiDate
+          :value="task.startDate ?? null"
+          placeholder="Нет даты"
+         
+          clearable
+          @update:value="onStartDate"
         />
       </div>
       <div class="field">
         <label>Due date</label>
-        <DatePicker
-          :model-value="dueDateValue"
-          show-icon
-          show-button-bar
-          size="small"
-          @update:model-value="(v) => onDueDate(Array.isArray(v) ? (v[0] as Date | null) : (v as Date | null))"
+        <UiDate
+          :value="task.dueDate ?? null"
+          placeholder="Нет даты"
+         
+          clearable
+          @update:value="onDueDate"
         />
+      </div>
+      <div class="field field--tags">
+        <label>Tags</label>
+        <TaskTagsField :value="task.tagIds" @update:value="onTagsChange" />
       </div>
     </section>
 
@@ -239,7 +241,7 @@ const dueDateValue = computed({
         <UiInput
           :value="newSubtaskTitle"
           placeholder="Add a subtask, press Enter"
-          size="small"
+         
           class="add-input"
           @update:value="(v: unknown) => newSubtaskTitle = String(v ?? '')"
           @keydown.enter.stop="addSubtask"

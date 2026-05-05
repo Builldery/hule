@@ -16,7 +16,6 @@ const workspacesStore = useWorkspacesStore()
 const email = ref('')
 const password = ref('')
 const submitting = ref(false)
-const formError = ref<string | null>(null)
 
 function readMessage(body: unknown, fallback: string): string {
   if (body && typeof body === 'object' && 'message' in body) {
@@ -29,9 +28,8 @@ function readMessage(body: unknown, fallback: string): string {
 
 async function onSubmit(): Promise<void> {
   if (submitting.value) return
-  formError.value = null
   if (!email.value.trim() || !password.value) {
-    formError.value = 'Enter email and password'
+    toast.error('Enter email and password')
     return
   }
   submitting.value = true
@@ -41,12 +39,7 @@ async function onSubmit(): Promise<void> {
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
     await router.replace(redirect)
   } catch (err) {
-    if (err instanceof HttpError) {
-      formError.value = readMessage(err.body, 'Invalid email or password')
-    } else {
-      formError.value = 'Failed to sign in'
-    }
-    toast.error(formError.value)
+    toast.error(err instanceof HttpError ? readMessage(err.body, 'Invalid email or password') : 'Failed to sign in')
   } finally {
     submitting.value = false
   }
@@ -54,7 +47,11 @@ async function onSubmit(): Promise<void> {
 </script>
 
 <template>
-  <AuthLayout title="Sign in" subtitle="Welcome back to Hule">
+  <AuthLayout title="Sign in">
+    <template #description>
+      No account yet?
+      <router-link to="/register">Create one</router-link>
+    </template>
     <form class="auth-form" @submit.prevent="onSubmit">
       <UiInput
         label="Email"
@@ -71,7 +68,8 @@ async function onSubmit(): Promise<void> {
         placeholder="••••••••"
         :disabled="submitting"
       />
-      <p v-if="formError" class="form-error">{{ formError }}</p>
+    </form>
+    <template #footer>
       <UiButton
         type="submit"
         label="Sign in"
@@ -80,11 +78,7 @@ async function onSubmit(): Promise<void> {
         :disabled="submitting"
         @click="onSubmit"
       />
-    </form>
-    <p class="auth-footer">
-      No account yet?
-      <router-link to="/register">Create one</router-link>
-    </p>
+    </template>
   </AuthLayout>
 </template>
 
@@ -93,23 +87,5 @@ async function onSubmit(): Promise<void> {
   display: flex;
   flex-direction: column;
   gap: 14px;
-}
-.form-error {
-  margin: 0;
-  color: #dc2626;
-  font-size: 13px;
-}
-.auth-footer {
-  margin: 0;
-  font-size: 13px;
-  text-align: center;
-  color: #4b5563;
-}
-.auth-footer a {
-  color: #2563eb;
-  text-decoration: none;
-}
-.auth-footer a:hover {
-  text-decoration: underline;
 }
 </style>

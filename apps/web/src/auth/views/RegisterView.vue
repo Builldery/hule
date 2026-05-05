@@ -16,7 +16,6 @@ const email = ref('')
 const name = ref('')
 const password = ref('')
 const submitting = ref(false)
-const formError = ref<string | null>(null)
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -40,10 +39,9 @@ function readMessage(body: unknown, fallback: string): string {
 
 async function onSubmit(): Promise<void> {
   if (submitting.value) return
-  formError.value = null
-  const err = validate()
-  if (err) {
-    formError.value = err
+  const validationError = validate()
+  if (validationError) {
+    toast.error(validationError)
     return
   }
   submitting.value = true
@@ -57,12 +55,7 @@ async function onSubmit(): Promise<void> {
     toast.success('Account created')
     await router.replace('/')
   } catch (e) {
-    if (e instanceof HttpError) {
-      formError.value = readMessage(e.body, 'Failed to create account')
-    } else {
-      formError.value = 'Failed to create account'
-    }
-    toast.error(formError.value)
+    toast.error(e instanceof HttpError ? readMessage(e.body, 'Failed to create account') : 'Failed to create account')
   } finally {
     submitting.value = false
   }
@@ -70,7 +63,11 @@ async function onSubmit(): Promise<void> {
 </script>
 
 <template>
-  <AuthLayout title="Create account" subtitle="Set up your Hule workspace">
+  <AuthLayout title="Create account">
+    <template #description>
+      Already have an account?
+      <router-link to="/login">Sign in</router-link>
+    </template>
     <form class="auth-form" @submit.prevent="onSubmit">
       <UiInput
         label="Email"
@@ -94,7 +91,8 @@ async function onSubmit(): Promise<void> {
         placeholder="At least 8 characters"
         :disabled="submitting"
       />
-      <p v-if="formError" class="form-error">{{ formError }}</p>
+    </form>
+    <template #footer>
       <UiButton
         type="submit"
         label="Create account"
@@ -103,11 +101,7 @@ async function onSubmit(): Promise<void> {
         :disabled="submitting"
         @click="onSubmit"
       />
-    </form>
-    <p class="auth-footer">
-      Already have an account?
-      <router-link to="/login">Sign in</router-link>
-    </p>
+    </template>
   </AuthLayout>
 </template>
 
@@ -116,23 +110,5 @@ async function onSubmit(): Promise<void> {
   display: flex;
   flex-direction: column;
   gap: 14px;
-}
-.form-error {
-  margin: 0;
-  color: #dc2626;
-  font-size: 13px;
-}
-.auth-footer {
-  margin: 0;
-  font-size: 13px;
-  text-align: center;
-  color: #4b5563;
-}
-.auth-footer a {
-  color: #2563eb;
-  text-decoration: none;
-}
-.auth-footer a:hover {
-  text-decoration: underline;
 }
 </style>

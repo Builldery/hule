@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import AppSidebar from '@/sidebar/components/AppSidebar.vue'
 import AppTopBar from '@/app/components/AppTopBar.vue'
+import AuroraBackground from '@/app/components/AuroraBackground.vue'
 import TaskView from '@/task/views/TaskView.vue'
 import { UiCard, UiModal, UiDeleteModal } from '@buildery/ui-kit/components'
 import { useConfirmState, closeConfirm } from '@/app/compose/useConfirm'
@@ -20,6 +21,7 @@ const isAuthLayout = computed(() => route.meta?.layout === 'auth')
   <router-view v-if="isAuthLayout" />
 
   <div v-else class="app-layout">
+    <AuroraBackground />
     <aside class="app-sidebar ui--single-card">
       <AppSidebar />
     </aside>

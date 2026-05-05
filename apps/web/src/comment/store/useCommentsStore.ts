@@ -35,6 +35,19 @@ export const useCommentsStore = defineStore('comments', () => {
     return created
   }
 
+  async function update(
+    commentId: string,
+    taskId: string,
+    patch: { body?: string },
+  ): Promise<Comment> {
+    const updated = await repo.comments.update(wsId(), commentId, patch)
+    byTask.value = {
+      ...byTask.value,
+      [taskId]: (byTask.value[taskId] ?? []).map(c => c.id === commentId ? updated : c),
+    }
+    return updated
+  }
+
   async function remove(commentId: string, taskId: string): Promise<void> {
     await repo.comments.remove(wsId(), commentId)
     byTask.value = {
@@ -48,5 +61,5 @@ export const useCommentsStore = defineStore('comments', () => {
     loadingTasks.value = new Set()
   }
 
-  return { byTask, getForTask, loadForTask, create, remove, reset }
+  return { byTask, getForTask, loadForTask, create, update, remove, reset }
 })

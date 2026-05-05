@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { UiIcon } from '@buildery/ui-kit/components'
 import type { Task } from '@hule/types'
 import { priorityMeta } from '@/task/constants/tasks'
 import { useTasksStore } from '@/task/store/useTasksStore'
@@ -46,13 +47,18 @@ function onClick(): void {
   >
     <div class="title">{{ task.title }}</div>
     <div class="meta">
-      <i v-if="task.priority !== 'none'" class="pi" :class="priorityMeta(task.priority).icon"
-         :style="{ color: priorityMeta(task.priority).color }"></i>
+      <UiIcon
+        v-if="task.priority !== 'none'"
+        :icon-name="priorityMeta(task.priority).icon"
+        :color="priorityMeta(task.priority).color"
+        width="12px"
+        height="12px"
+      />
       <span v-if="subtaskCount > 0" class="chip">
-        <i class="pi pi-sitemap"></i>{{ subtaskCount }}
+        <UiIcon icon-name="GitFork" width="12px" height="12px" />{{ subtaskCount }}
       </span>
       <span v-if="task.dueDate" class="chip">
-        <i class="pi pi-calendar"></i>{{ new Date(task.dueDate).toLocaleDateString() }}
+        <UiIcon icon-name="Calendar" width="12px" height="12px" />{{ new Date(task.dueDate).toLocaleDateString() }}
       </span>
     </div>
   </div>
@@ -83,5 +89,4 @@ function onClick(): void {
   align-items: center;
   gap: 4px;
 }
-.chip i { font-size: 10px; }
 </style>

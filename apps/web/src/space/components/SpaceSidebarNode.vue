@@ -2,7 +2,8 @@
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
-  UiButton,
+  UiIcon,
+  UiIconButton,
   UiRawInput,
   UiTreeViewItem,
 } from '@buildery/ui-kit/components'
@@ -155,9 +156,12 @@ async function confirmDeleteList(list: List): Promise<void> {
     @collapse="expanded = false"
   >
     <template #marker="{ isOpen, toggle }">
-      <i
-        class="pi chev-icon"
-        :class="isOpen ? 'pi-chevron-down' : 'pi-chevron-right'"
+      <UiIconButton
+        :icon-name="isOpen ? 'NavArrowDown' : 'NavArrowRight'"
+        size="small"
+        fill="outlined-tonal"
+        color="gray"
+        class="chev-btn"
         @click.stop="toggle"
       />
     </template>
@@ -184,15 +188,9 @@ async function confirmDeleteList(list: List): Promise<void> {
         </router-link>
 
         <div class="space-actions">
-          <UiButton size="small" fill="text" color="gray" title="Add list" @click.stop="onAddListClick">
-            <i class="pi pi-plus" aria-label="Add list" />
-          </UiButton>
-          <UiButton size="small" fill="text" color="gray" title="Rename space" @click.stop="editingName = true">
-            <i class="pi pi-pencil" aria-label="Rename space" />
-          </UiButton>
-          <UiButton size="small" fill="text" color="gray" title="Delete space" @click.stop="confirmDelete">
-            <i class="pi pi-trash" aria-label="Delete space" />
-          </UiButton>
+          <UiIconButton size="small" fill="outlined-tonal" color="gray" class="act" title="Add list" icon-name="Plus" @click.stop="onAddListClick" />
+          <UiIconButton size="small" fill="outlined-tonal" color="gray" class="act" title="Rename space" icon-name="EditPencil" @click.stop="editingName = true" />
+          <UiIconButton size="small" fill="outlined-tonal" color="red" class="act" title="Delete space" icon-name="Trash" @click.stop="confirmDelete" />
         </div>
       </div>
     </template>
@@ -205,7 +203,7 @@ async function confirmDeleteList(list: List): Promise<void> {
       >
         <template #default>
           <div class="list-row" :class="{ active: route.params.listId === list.id }">
-            <i class="pi pi-list list-icon"></i>
+            <UiIcon icon-name="List" class="list-icon" width="14px" height="14px" />
 
             <div v-if="listDrafts[list.id]?.editing" class="name-input">
               <UiRawInput
@@ -227,19 +225,15 @@ async function confirmDeleteList(list: List): Promise<void> {
             </router-link>
 
             <div class="list-actions">
-              <UiButton size="small" fill="text" color="gray" title="Rename list" @click.stop="startListEdit(list)">
-                <i class="pi pi-pencil" aria-label="Rename list" />
-              </UiButton>
-              <UiButton size="small" fill="text" color="gray" title="Delete list" @click.stop="confirmDeleteList(list)">
-                <i class="pi pi-trash" aria-label="Delete list" />
-              </UiButton>
+              <UiIconButton size="small" fill="outlined-tonal" color="gray" class="act" title="Rename list" icon-name="EditPencil" @click.stop="startListEdit(list)" />
+              <UiIconButton size="small" fill="outlined-tonal" color="red" class="act" title="Delete list" icon-name="Trash" @click.stop="confirmDeleteList(list)" />
             </div>
           </div>
         </template>
       </UiTreeViewItem>
 
       <div v-if="addingList" class="list-row add-list">
-        <i class="pi pi-list list-icon muted"></i>
+        <UiIcon icon-name="List" class="list-icon muted" width="14px" height="14px" />
         <div class="name-input">
           <UiRawInput
             :value="newListName"
@@ -257,32 +251,27 @@ async function confirmDeleteList(list: List): Promise<void> {
 </template>
 
 <style scoped>
-.chev-icon {
-  font-size: 10px;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 4px;
-}
 .space-row {
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding-right: 8px;
+  gap: 4px;
+  padding: 4px 8px;
   min-height: 32px;
   flex: 1;
+  border-radius: 4px;
+  transition: background 0.12s;
 }
+.space-row:hover { background: var(--hover); }
 .space-row:hover .space-actions { opacity: 1; }
 .space-actions {
   margin-left: auto;
   display: flex;
-  gap: 2px;
+  gap: 4px;
   opacity: 0;
   transition: opacity 0.12s;
 }
 .space-name {
   flex: 1;
-  padding: 4px 6px;
-  border-radius: 4px;
   text-decoration: none;
   color: inherit;
   font-weight: 500;
@@ -290,13 +279,12 @@ async function confirmDeleteList(list: List): Promise<void> {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.space-name:hover { background: var(--hover); }
 .list-row {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 4px 10px;
-  margin: 1px 8px 1px 0;
+  margin: 1px 0;
   border-radius: 4px;
   font-size: 13px;
   flex: 1;
@@ -308,11 +296,10 @@ async function confirmDeleteList(list: List): Promise<void> {
 .list-actions {
   margin-left: auto;
   display: flex;
-  gap: 2px;
+  gap: 4px;
   opacity: 0;
   transition: opacity 0.12s;
 }
-.list-icon { font-size: 12px; }
 .list-name {
   overflow: hidden;
   text-overflow: ellipsis;

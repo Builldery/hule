@@ -1,5 +1,5 @@
 import type {
-  Space, List, Task, Comment,
+  Space, List, Task, Tag, TagColor, Comment,
   CreateSpaceDto, UpdateSpaceDto, CreateListDto, UpdateListDto, ReorderItem,
 } from '@hule/types'
 
@@ -12,6 +12,7 @@ export interface CreateTaskDto {
   priority?: string
   startDate?: string
   dueDate?: string
+  tagIds?: string[]
 }
 
 export interface UpdateTaskDto {
@@ -21,6 +22,17 @@ export interface UpdateTaskDto {
   priority?: string
   startDate?: string | null
   dueDate?: string | null
+  tagIds?: string[]
+}
+
+export interface CreateTagDto {
+  name: string
+  color?: TagColor
+}
+
+export interface UpdateTagDto {
+  name?: string
+  color?: TagColor
 }
 
 export interface MoveTaskDto {
@@ -66,6 +78,15 @@ export interface ITasksRepo {
 export interface ICommentsRepo {
   listForTask(wsId: string, taskId: string): Promise<Comment[]>
   create(wsId: string, taskId: string, dto: { body?: string; files?: File[] }): Promise<Comment>
+  update(wsId: string, id: string, patch: { body?: string }): Promise<Comment>
+  remove(wsId: string, id: string): Promise<void>
+}
+
+export interface ITagsRepo {
+  list(wsId: string): Promise<Tag[]>
+  get(wsId: string, id: string): Promise<Tag>
+  create(wsId: string, dto: CreateTagDto): Promise<Tag>
+  update(wsId: string, id: string, patch: UpdateTagDto): Promise<Tag>
   remove(wsId: string, id: string): Promise<void>
 }
 
@@ -74,4 +95,5 @@ export interface Repo {
   lists: IListsRepo
   tasks: ITasksRepo
   comments: ICommentsRepo
+  tags: ITagsRepo
 }

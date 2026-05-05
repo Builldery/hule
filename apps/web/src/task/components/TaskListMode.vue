@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { UiInfo, UiInput } from '@buildery/ui-kit/components'
+import { UiInfo, UiInput, UiTreeView } from '@buildery/ui-kit/components'
 import { useTasksStore } from '@/task/store/useTasksStore'
-import TaskRow from './TaskRow.vue'
+import TaskTreeNode from './TaskTreeNode.vue'
 
 const props = defineProps<{ listId: string }>()
 
@@ -10,9 +10,9 @@ const tasksStore = useTasksStore()
 const newTitle = ref('')
 const creating = ref(false)
 
+const allTasks = computed(() => tasksStore.getForList(props.listId))
 const rootTasks = computed(() =>
-  tasksStore
-    .getForList(props.listId)
+  allTasks.value
     .filter(t => t.parentId === null)
     .sort((a, b) => a.order - b.order),
 )
@@ -44,7 +44,7 @@ async function createTask(): Promise<void> {
       <UiInput
         :value="newTitle"
         placeholder="Add a task, press Enter"
-        size="small"
+       
         class="add-input"
         @update:value="(v: unknown) => newTitle = String(v ?? '')"
         @keydown.enter.stop="createTask"
@@ -53,7 +53,14 @@ async function createTask(): Promise<void> {
     <UiInfo v-if="rootTasks.length === 0" class="empty">
       No tasks yet.
     </UiInfo>
-    <TaskRow v-for="t in rootTasks" :key="t.id" :task="t" />
+    <UiTreeView v-else>
+      <TaskTreeNode
+        v-for="t in rootTasks"
+        :key="t.id"
+        :task="t"
+        :all="allTasks"
+      />
+    </UiTreeView>
   </div>
 </template>
 

@@ -52,7 +52,7 @@ const emit = defineEmits<{
             :suggestions="findSuggestions"
             option-label="title"
             :placeholder="findPlaceholder"
-            size="small"
+           
             class="qa-input"
             :min-length="0"
             force-selection
@@ -68,7 +68,7 @@ const emit = defineEmits<{
           <UiInput
             :value="newTitle"
             :placeholder="createPlaceholder"
-            size="small"
+           
             autofocus
             class="qa-input"
             @update:value="(v: unknown) => emit('update:newTitle', String(v ?? ''))"
@@ -82,7 +82,7 @@ const emit = defineEmits<{
       <div class="qa-footer">
         <UiButton
           label="Create Task"
-          size="small"
+         
           color="blue"
           fill="filled"
           class="qa-create-btn"

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { UiButton } from '@buildery/ui-kit/components'
+import { UiButton, UiIconButton } from '@buildery/ui-kit/components'
 import Textarea from 'primevue/textarea'
 import { useDropZone } from '@vueuse/core'
 import { useCommentsStore } from '@/comment/store/useCommentsStore'
@@ -79,16 +79,22 @@ async function submit(): Promise<void> {
       <div v-for="(p, i) in previews" :key="i" class="preview">
         <img v-if="p.url" :src="p.url" alt="">
         <span v-else class="file-name">{{ p.name }}</span>
-        <button class="rm" aria-label="Remove" @click="removeFile(i)">
-          <i class="pi pi-times"></i>
-        </button>
+        <UiIconButton
+          class="rm"
+          icon-name="Xmark"
+          fill="text"
+          color="gray"
+         
+          aria-label="Remove"
+          @click="removeFile(i)"
+        />
       </div>
     </div>
     <div class="actions">
       <span class="muted hint">Ctrl/Cmd + Enter</span>
       <UiButton
         label="Comment"
-        size="small"
+       
         color="blue"
         fill="filled"
         :disabled="submitting || (!body.trim() && files.length === 0)"
@@ -131,17 +137,16 @@ async function submit(): Promise<void> {
   position: absolute;
   top: 2px;
   right: 2px;
+}
+.rm :deep(button) {
   background: rgba(0,0,0,0.6);
   color: #fff;
-  border: none;
+  border-radius: 50%;
   width: 20px;
   height: 20px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
+  min-width: 0;
+  padding: 0;
 }
-.rm i { font-size: 10px; }
 .actions {
   display: flex;
   justify-content: flex-end;

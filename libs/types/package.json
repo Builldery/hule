@@ -11,6 +11,7 @@
     "./list": "./src/list.ts",
     "./view": "./src/view.ts",
     "./task": "./src/task.ts",
+    "./tag": "./src/tag.ts",
     "./comment": "./src/comment.ts",
     "./common": "./src/common.ts"
   }

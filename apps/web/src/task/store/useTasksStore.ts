@@ -111,11 +111,23 @@ export const useTasksStore = defineStore('tasks', () => {
     loadingLists.value = new Set()
   }
 
+  function stripTagFromAll(tagId: string): void {
+    const stripped = (arr: Task[]): Task[] =>
+      arr.map(t => (t.tagIds.includes(tagId) ? { ...t, tagIds: t.tagIds.filter(x => x !== tagId) } : t))
+    const nextByList: Record<string, Task[]> = {}
+    for (const [lid, arr] of Object.entries(byList.value)) nextByList[lid] = stripped(arr)
+    byList.value = nextByList
+    const nextSubtrees: Record<string, Task[]> = {}
+    for (const [rid, arr] of Object.entries(subtrees.value)) nextSubtrees[rid] = stripped(arr)
+    subtrees.value = nextSubtrees
+  }
+
   return {
     byList, subtrees, byId,
     getForList, getSubtree,
     loadForList, loadSubtree,
     create, update, move, remove, reset,
+    stripTagFromAll,
   }
 })
 

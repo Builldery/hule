@@ -33,13 +33,13 @@ const emit = defineEmits<{
           :key="m"
           :value="m"
           :label="VIEW_MODE_LABEL[m]"
-          size="small"
+         
         />
       </UiRadioGroup>
     </UiButtonGroup>
-    <UiButton size="small" fill="outlined-tonal" color="gray" label="Today" @click="emit('today')" />
+    <UiButton fill="outlined-tonal" color="gray" label="Today" @click="emit('today')" />
     <UiButton
-      size="small"
+     
       fill="outlined-tonal"
       color="gray"
       label="Fit all"

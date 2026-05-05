@@ -16,6 +16,7 @@ export interface Task {
   order: number
   depth: number
   path: string[]
+  tagIds: string[]
   createdAt: IsoDateString
   updatedAt: IsoDateString
 }

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import {
-  UiButton,
+  UiIconButton,
   UiInfo,
-  UiRawInput,
+  UiInput,
   UiTreeView,
 } from '@buildery/ui-kit/components'
 import { useToast } from '@/app/compose/useToast'
@@ -46,20 +46,19 @@ function cancel(): void {
   <div class="sidebar">
     <div class="sidebar-head">
       <div class="brand">Hule</div>
-      <UiButton
+      <UiIconButton
         v-if="!adding"
         size="small"
-        fill="text"
+        fill="outlined"
         color="gray"
         title="Add space"
+        icon-name="Plus"
         @click="adding = true"
-      >
-        <i class="pi pi-plus" aria-label="Add space" />
-      </UiButton>
+      />
     </div>
 
     <div v-if="adding" class="sidebar-input">
-      <UiRawInput
+      <UiInput
         :value="newName"
         placeholder="Space name"
         autofocus
@@ -90,7 +89,7 @@ function cancel(): void {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 16px 8px;
+  padding: 4px 0 8px;
 }
 .brand {
   font-weight: 600;
@@ -100,22 +99,14 @@ function cancel(): void {
 .sidebar-input {
   padding: 4px 12px 8px;
 }
-.sidebar-input :deep(input) {
-  width: 100%;
-  padding: 4px 8px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  outline: none;
-  font: inherit;
-  color: inherit;
-  background: var(--bg);
-}
-.sidebar-input :deep(input:focus) { border-color: var(--accent-primary); }
 .sidebar-empty {
   padding: 8px 16px;
   font-size: 13px;
 }
 .sidebar-info {
   margin: 8px 12px;
+}
+:deep(.ui-tree-view-item__row) {
+  gap: 4px;
 }
 </style>

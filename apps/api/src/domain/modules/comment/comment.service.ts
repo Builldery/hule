@@ -118,6 +118,25 @@ export class CommentService {
     return new CommentDto(created);
   }
 
+  async update(
+    wsId: string,
+    id: string,
+    dto: { body?: string },
+  ): Promise<CommentDto> {
+    const wsOid = toOid(wsId);
+    const oid = toOid(id);
+    const doc = await this.commentModel.findOne({ _id: oid, workspaceId: wsOid });
+    if (!doc) throw new NotFoundException('Comment not found');
+
+    const trimmed = dto.body?.trim();
+    if (!trimmed && (doc.attachments?.length ?? 0) === 0) {
+      throw new BadRequestException('Comment must have body or attachments');
+    }
+    doc.body = trimmed || undefined;
+    await doc.save();
+    return new CommentDto(doc);
+  }
+
   async delete(wsId: string, id: string): Promise<void> {
     const wsOid = toOid(wsId);
     const oid = toOid(id);

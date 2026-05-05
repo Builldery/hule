@@ -5,14 +5,14 @@ export default { name: 'TaskTreeNode' }
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import {
-  UiButton,
-  UiCombobox,
-  UiListboxOption,
+  UiIcon,
+  UiIconButton,
   UiRawInput,
   UiTreeViewItem,
 } from '@buildery/ui-kit/components'
 import type { Task } from '@hule/types'
-import { STATUS_OPTIONS, statusMeta } from '@/task/constants/tasks'
+import StatusMenu from '@/task/components/StatusMenu.vue'
+import type { StatusOption } from '@/task/constants/tasks'
 import { useTasksStore } from '@/task/store/useTasksStore'
 import { useListsStore } from '@/list/store/useListsStore'
 import { useTaskModal } from '@/app/compose/useTaskModal'
@@ -57,12 +57,8 @@ async function saveTitle(): Promise<void> {
   editing.value = false
 }
 
-async function toggleDone(): Promise<void> {
-  const next = props.task.status === 'done' ? 'todo' : 'done'
-  await tasksStore.update(props.task.id, { status: next })
-}
-
-async function onStatusChange(v: string): Promise<void> {
+async function setStatus(v: string): Promise<void> {
+  if (v === props.task.status) return
   await tasksStore.update(props.task.id, { status: v })
 }
 
@@ -87,38 +83,28 @@ async function addSubtask(): Promise<void> {
 async function remove(): Promise<void> {
   await tasksStore.remove(props.task.id)
 }
-
-const statusLabel = (v: string): string => statusMeta(v).label
-
-// UiTreeViewItem decides whether to render the `#children` slot based on
-// `!!useSlots().children` inside its setup — which is NOT reactive to slot
-// presence changes. Toggling a `v-if` on `<template #children>` therefore
-// doesn't trigger a re-eval of `hasChildren`. We work around it by keying
-// the item on the two distinct states (container vs leaf): when the user
-// clicks "+" on a leaf, the key flips and Vue remounts UiTreeViewItem with
-// the slot genuinely present, and its internal setup captures it correctly.
-const itemKey = computed(() =>
-  (children.value.length > 0 || addingSubtask.value) ? 'container' : 'leaf',
-)
 </script>
 
 <template>
-  <UiTreeViewItem :key="itemKey" :node-key="`task-${task.id}`" :default-open="true">
-    <template #marker="{ isOpen, hasChildren, toggle }">
-      <i
-        v-if="hasChildren"
-        class="pi chev-icon"
-        :class="isOpen ? 'pi-chevron-down' : 'pi-chevron-right'"
-        @click.stop="toggle"
-      />
+  <UiTreeViewItem :node-key="`task-${task.id}`" :default-open="true">
+    <template #marker>
+      <StatusMenu :value="task.status" @update:value="setStatus">
+        <template #default="{ meta }: { meta: StatusOption }">
+          <button
+            class="check"
+            :class="{ checked: task.status === 'done' }"
+            :style="{ '--status-color': meta.color }"
+            :title="meta.label"
+            type="button"
+          >
+            <UiIcon v-if="task.status === 'done'" icon-name="Check" width="12px" height="12px" />
+          </button>
+        </template>
+      </StatusMenu>
     </template>
 
     <template #default>
       <div class="tree-row" :class="{ done: task.status === 'done' }">
-        <button class="check" :class="{ checked: task.status === 'done' }" @click="toggleDone">
-          <i v-if="task.status === 'done'" class="pi pi-check"></i>
-        </button>
-
         <div v-if="editing" class="title-input">
           <UiRawInput
             :value="titleDraft"
@@ -129,39 +115,30 @@ const itemKey = computed(() =>
             @blur="saveTitle"
           />
         </div>
-        <span v-else class="title" @click="editing = true">{{ task.title }}</span>
-
-        <span v-if="children.length > 0" class="count muted">{{ doneCount }}/{{ children.length }}</span>
-
-        <UiCombobox
-          :value="task.status"
-          :get-display-value="statusLabel"
-          size="small"
-          class="status-combo"
-          :style="{ '--status-color': statusMeta(task.status).color }"
-          @update:value="onStatusChange"
+        <div
+          v-else
+          class="title-zone"
+          role="button"
+          tabindex="0"
+          @click="open"
+          @keydown.enter.prevent="open"
         >
-          <UiListboxOption
-            v-for="o in STATUS_OPTIONS"
-            :key="o.value"
-            :value="o.value"
-            :label="o.label"
-          />
-        </UiCombobox>
+          <span class="title">{{ task.title }}</span>
+          <span v-if="children.length > 0" class="count muted">
+            <UiIcon icon-name="GitFork" width="12px" height="12px" />
+            {{ doneCount }}/{{ children.length }}
+          </span>
+        </div>
 
-        <UiButton size="small" fill="text" color="gray" class="act" title="Add subtask" @click="addingSubtask = true">
-          <i class="pi pi-plus" aria-label="Add subtask" />
-        </UiButton>
-        <UiButton size="small" fill="text" color="gray" class="act" title="Open task" @click="open">
-          <i class="pi pi-arrow-up-right" aria-label="Open task" />
-        </UiButton>
-        <UiButton size="small" fill="text" color="gray" class="act" title="Delete" @click="remove">
-          <i class="pi pi-trash" aria-label="Delete" />
-        </UiButton>
+        <div class="actions">
+          <UiIconButton size="small" fill="outlined-tonal" color="gray" class="act" title="Add subtask" icon-name="Plus" @click.stop="addingSubtask = true" />
+          <UiIconButton v-if="!editing" size="small" fill="outlined-tonal" color="gray" class="act" title="Rename" icon-name="EditPencil" @click.stop="editing = true" />
+          <UiIconButton size="small" fill="outlined-tonal" color="red" class="act" title="Delete" icon-name="Trash" @click.stop="remove" />
+        </div>
       </div>
     </template>
 
-    <template v-if="children.length > 0 || addingSubtask" #children>
+    <template #children>
       <div v-if="addingSubtask" class="add-child">
         <UiRawInput
           :value="subtaskTitle"
@@ -191,16 +168,12 @@ const itemKey = computed(() =>
   padding: 4px 0;
   flex: 1;
 }
-.chev-icon {
-  font-size: 10px;
-  color: var(--text-muted);
-  cursor: pointer;
-}
+:deep(.ui-tree-view-item__marker) { cursor: default; }
 .check {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  border: 1.5px solid var(--text-muted);
+  border: 1.5px solid var(--status-color, var(--text-muted));
   background: transparent;
   cursor: pointer;
   display: grid;
@@ -209,9 +182,19 @@ const itemKey = computed(() =>
   flex-shrink: 0;
 }
 .check.checked { background: var(--status-done); border-color: var(--status-done); color: white; }
-.check i { font-size: 10px; }
-.title { cursor: text; padding: 2px 4px; border-radius: 3px; flex: 1; }
-.title:hover { background: var(--hover); }
+.title-zone {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  min-width: 0;
+}
+.title-zone:hover { background: var(--hover); }
+.title-zone:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 1px; }
+.title { user-select: none; }
 .done .title { text-decoration: line-through; color: var(--text-muted); }
 .title-input { flex: 1; display: flex; }
 .title-input :deep(input) {
@@ -224,15 +207,24 @@ const itemKey = computed(() =>
   font: inherit;
   color: inherit;
 }
-.count { font-size: 12px; }
-.status-combo { width: 140px; }
-.status-combo :deep(.input-wrapper) {
-  border-color: var(--status-color, var(--border));
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  flex-shrink: 0;
 }
 .act { opacity: 0; transition: opacity 0.1s; }
 .tree-row:hover .act { opacity: 1; }
 .add-child {
-  padding: 4px 0 4px 32px;
+  padding: 4px 0;
   display: flex;
 }
 .add-child :deep(input) {

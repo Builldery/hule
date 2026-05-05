@@ -15,6 +15,12 @@ export const commentsHttpRepo: ICommentsRepo = {
     return http<Comment>(`${wsBase(wsId)}/tasks/${taskId}/comments`, { method: 'POST', body: fd })
   },
 
+  update: (wsId, id, patch) =>
+    http<Comment>(`${wsBase(wsId)}/comments/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(patch),
+    }),
+
   remove: (wsId, id) =>
     http<void>(`${wsBase(wsId)}/comments/${id}`, { method: 'DELETE' }),
 }

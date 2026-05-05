@@ -105,9 +105,6 @@ importers:
       pinia:
         specifier: ^2.3.0
         version: 2.3.1(typescript@6.0.3)(vue@3.5.33(typescript@6.0.3))
-      primeicons:
-        specifier: ^7.0.0
-        version: 7.0.0
       primevue:
         specifier: ^4.2.5
         version: 4.5.5(vue@3.5.33(typescript@6.0.3))
@@ -4571,9 +4568,6 @@ packages:
   pretty-hrtime@1.0.3:
     resolution: {integrity: sha512-66hKPCr+72mlfiSjlEB1+45IjXSqvVAIy6mocupoww4tBFE9R9IhwwUGoI4G++Tc9Aq+2rxOt0RFU6gPcrte0A==}
     engines: {node: '>= 0.8'}
-
-  primeicons@7.0.0:
-    resolution: {integrity: sha512-jK3Et9UzwzTsd6tzl2RmwrVY/b8raJ3QZLzoDACj+oTJ0oX7L9Hy+XnVwgo4QVKlKpnP/Ur13SXV/pVh4LzaDw==}
 
   primevue@4.5.5:
     resolution: {integrity: sha512-Kv5REIewCdP806QaoU+4nBXfmpzOGFKkZ9qH4KsL6MjiAQVc4PUzypt8erl4r3Vzh3nr3aWZIxkxYRRsLGiX2A==}
@@ -10426,8 +10420,6 @@ snapshots:
       source-map-js: 1.2.1
 
   pretty-hrtime@1.0.3: {}
-
-  primeicons@7.0.0: {}
 
   primevue@4.5.5(vue@3.5.33(typescript@6.0.3)):
     dependencies:

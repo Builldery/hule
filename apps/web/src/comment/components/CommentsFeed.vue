@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { UiButton, UiInfo } from '@buildery/ui-kit/components'
+import { UiButton, UiIconButton, UiInfo } from '@buildery/ui-kit/components'
+import Textarea from 'primevue/textarea'
 import { useCommentsStore } from '@/comment/store/useCommentsStore'
 import { useWorkspacesStore } from '@/workspace/store/useWorkspacesStore'
 import { TOKEN_STORAGE_KEY } from '@/app/api/httpClient'
@@ -14,6 +15,9 @@ const workspacesStore = useWorkspacesStore()
 const items = computed(() => commentsStore.getForTask(props.taskId))
 
 const objectUrls = ref<Record<string, string>>({})
+const editingId = ref<string | null>(null)
+const draft = ref('')
+const saving = ref(false)
 
 async function fetchAttachmentUrl(fileId: string): Promise<void> {
   if (objectUrls.value[fileId]) return
@@ -68,6 +72,32 @@ function formatDate(s: string): string {
   return d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 }
 
+function startEdit(id: string, body: string | undefined): void {
+  editingId.value = id
+  draft.value = body ?? ''
+}
+
+function cancelEdit(): void {
+  editingId.value = null
+  draft.value = ''
+}
+
+async function saveEdit(id: string): Promise<void> {
+  if (saving.value) return
+  const text = draft.value.trim()
+  const original = items.value.find(c => c.id === id)
+  if (!original) { cancelEdit(); return }
+  if (text === (original.body ?? '')) { cancelEdit(); return }
+  if (!text && original.attachments.length === 0) return
+  saving.value = true
+  try {
+    await commentsStore.update(id, props.taskId, { body: text })
+    cancelEdit()
+  } finally {
+    saving.value = false
+  }
+}
+
 async function remove(id: string): Promise<void> {
   await commentsStore.remove(id, props.taskId)
 }
@@ -80,18 +110,56 @@ async function remove(id: string): Promise<void> {
       <header class="head">
         <span class="kind muted">{{ c.kind === 'activity' ? '• activity' : 'Comment' }}</span>
         <span class="muted date">{{ formatDate(c.createdAt) }}</span>
-        <UiButton
-          fill="text"
-          color="gray"
-          size="small"
-          class="del"
-          title="Delete comment"
-          @click="remove(c.id)"
-        >
-          <i class="pi pi-trash" aria-label="Delete comment" />
-        </UiButton>
+        <div class="actions">
+          <UiIconButton
+            v-if="editingId !== c.id"
+            size="small"
+            fill="outlined-tonal"
+            color="gray"
+            class="act"
+            title="Edit comment"
+            icon-name="EditPencil"
+            @click="startEdit(c.id, c.body)"
+          />
+          <UiIconButton
+            size="small"
+            fill="outlined-tonal"
+            color="red"
+            class="act"
+            title="Delete comment"
+            icon-name="Trash"
+            @click="remove(c.id)"
+          />
+        </div>
       </header>
-      <div v-if="c.body" class="body">{{ c.body }}</div>
+      <div v-if="editingId === c.id" class="edit">
+        <Textarea
+          v-model="draft"
+          auto-resize
+          rows="2"
+          class="edit-textarea"
+          @keydown.enter.exact.ctrl.prevent="saveEdit(c.id)"
+          @keydown.enter.exact.meta.prevent="saveEdit(c.id)"
+          @keydown.escape.prevent="cancelEdit"
+        />
+        <div class="edit-actions">
+          <span class="muted hint">Ctrl/Cmd + Enter</span>
+          <UiButton
+            label="Cancel"
+            color="gray"
+            fill="text"
+            @click="cancelEdit"
+          />
+          <UiButton
+            label="Save"
+            color="blue"
+            fill="filled"
+            :disabled="saving || (!draft.trim() && c.attachments.length === 0)"
+            @click="saveEdit(c.id)"
+          />
+        </div>
+      </div>
+      <div v-else-if="c.body" class="body">{{ c.body }}</div>
       <div v-if="c.attachments.length > 0" class="attachments">
         <a
           v-for="a in c.attachments"
@@ -126,11 +194,38 @@ async function remove(id: string): Promise<void> {
   font-size: 12px;
   margin-bottom: 6px;
 }
-.comment:hover .del { opacity: 1; }
-.del { margin-left: auto; opacity: 0; transition: opacity 0.1s; }
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+.act { opacity: 0; transition: opacity 0.1s; }
+.comment:hover .act { opacity: 1; }
 .date { margin-left: auto; }
 .kind { text-transform: uppercase; letter-spacing: 0.3px; font-weight: 500; }
 .body { white-space: pre-wrap; font-size: 14px; }
+.edit { display: flex; flex-direction: column; gap: 6px; }
+.edit-textarea { width: 100%; }
+.edit-textarea :deep(textarea) {
+  width: 100%;
+  resize: vertical;
+  min-height: 56px;
+  border: 1px solid var(--border);
+  box-shadow: none;
+  padding: 6px 8px;
+  font: inherit;
+  background: var(--bg);
+  color: inherit;
+}
+.edit-textarea :deep(textarea:focus) { border-color: var(--accent-primary); outline: none; }
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+.hint { font-size: 11px; }
 .attachments {
   display: flex;
   flex-wrap: wrap;

@@ -1,10 +1,12 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
   HttpCode,
   Inject,
   Param,
+  Patch,
   Post,
   Req,
 } from '@nestjs/common';
@@ -12,6 +14,7 @@ import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { FastifyRequest } from 'fastify';
 import { CommentService } from '../../../domain/modules/comment/comment.service';
 import { CommentDto } from '../../../domain/entity/comment/comment.dto';
+import { UpdateCommentDto } from '../../../domain/entity/comment/update-comment.dto';
 import { IdParamsDto } from '../../../domain/entity/common/id-params.dto';
 import { CurrentWorkspaceId } from '../decorators/current-workspace-id.decorator';
 
@@ -38,6 +41,16 @@ export class RestApiCommentController {
     @Req() req: FastifyRequest,
   ): Promise<CommentDto> {
     return this.commentService.createForTask(wsId, params.id, req);
+  }
+
+  @ApiResponse({ type: CommentDto })
+  @Patch('comments/:id')
+  update(
+    @CurrentWorkspaceId() wsId: string,
+    @Param() params: IdParamsDto,
+    @Body() dto: UpdateCommentDto,
+  ): Promise<CommentDto> {
+    return this.commentService.update(wsId, params.id, dto);
   }
 
   @Delete('comments/:id')

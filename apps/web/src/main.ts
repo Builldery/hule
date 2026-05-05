@@ -5,7 +5,6 @@ import Aura from '@primeuix/themes/aura'
 import Vue3Toastify from 'vue3-toastify'
 import { TOAST_CONFIG } from '@buildery/ui-kit/configs'
 
-import 'primeicons/primeicons.css'
 import 'vue3-toastify/dist/index.css'
 import '@/app/styles/buildery-tokens.scss'
 import './style.css'
