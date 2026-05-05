@@ -11,6 +11,8 @@ import { FileModule } from '../file/file.module';
 import { TagModule } from '../tag/tag.module';
 import { RecurringJobModule } from '../recurring-job/recurring-job.module';
 import { ActionModule } from '../action/action.module';
+import { PinModule } from '../pin/pin.module';
+import { ViewModule } from '../view/view.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { ActionModule } from '../action/action.module';
     TagModule,
     RecurringJobModule,
     ActionModule,
+    PinModule,
+    ViewModule,
   ],
   providers: [WorkspaceService],
   exports: [WorkspaceService],

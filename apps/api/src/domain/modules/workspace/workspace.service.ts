@@ -19,6 +19,8 @@ import { FileService } from '../file/file.service';
 import { TagService } from '../tag/tag.service';
 import { RecurringJobService } from '../recurring-job/recurring-job.service';
 import { ActionService } from '../action/action.service';
+import { PinService } from '../pin/pin.service';
+import { ViewService } from '../view/view.service';
 import { runBulk } from '../../../adapters/mongo/dispatch-context';
 
 function toOid(id: string): Types.ObjectId {
@@ -37,6 +39,8 @@ export class WorkspaceService {
     private readonly tagService: TagService,
     private readonly recurringJobService: RecurringJobService,
     private readonly actionService: ActionService,
+    private readonly pinService: PinService,
+    private readonly viewService: ViewService,
   ) {}
 
   async create(ownerId: string, dto: CreateWorkspaceDto): Promise<WorkspaceDto> {
@@ -89,6 +93,8 @@ export class WorkspaceService {
       await this.spaceService.deleteByWorkspaceId(wsOid);
       await this.fileService.deleteByWorkspaceId(wsOid);
       await this.tagService.deleteByWorkspaceId(wsOid);
+      await this.pinService.deleteByWorkspaceId(wsOid);
+      await this.viewService.deleteByWorkspaceId(wsOid);
       await this.workspaceModel.deleteOne({ _id: wsOid });
     });
   }

@@ -7,6 +7,7 @@ import { ListModule } from '../list/list.module';
 import { TaskTemplateModule } from '../task-template/task-template.module';
 import { RecurringJobModule } from '../recurring-job/recurring-job.module';
 import { ActionModule } from '../action/action.module';
+import { PinModule } from '../pin/pin.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ActionModule } from '../action/action.module';
     TaskTemplateModule,
     RecurringJobModule,
     ActionModule,
+    PinModule,
   ],
   providers: [SpaceService],
   exports: [SpaceService],

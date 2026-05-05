@@ -12,6 +12,9 @@ import { CreateListDto } from '../../entity/list/create-list.dto';
 import { UpdateListDto } from '../../entity/list/update-list.dto';
 import { ReorderItemDto } from '../../entity/common/reorder.dto';
 import { TaskService } from '../task/task.service';
+import { PinService } from '../pin/pin.service';
+import { EPinEntity } from '../../entity/pin/pin.constants';
+import { ViewService } from '../view/view.service';
 
 function toOid(id: string): Types.ObjectId {
   return new Types.ObjectId(id);
@@ -22,7 +25,11 @@ export class ListService {
   @InjectModel(List.name) private listModel: Model<ListDocument>;
   @InjectModel(Space.name) private spaceModel: Model<Space>;
 
-  constructor(private readonly taskService: TaskService) {}
+  constructor(
+    private readonly taskService: TaskService,
+    private readonly pinService: PinService,
+    private readonly viewService: ViewService,
+  ) {}
 
   async getBySpace(wsId: string, spaceId: string): Promise<Array<ListDto>> {
     const docs = await this.listModel
@@ -72,6 +79,8 @@ export class ListService {
     const res = await this.listModel.deleteOne({ _id: oid, workspaceId: wsOid });
     if (res.deletedCount === 0) throw new NotFoundException('List not found');
     await this.taskService.deleteByListIds(wsOid, [oid]);
+    await this.pinService.deleteByEntity(wsOid, EPinEntity.List, [oid]);
+    await this.viewService.pullListIds(wsOid, [oid]);
   }
 
   async reorder(wsId: string, items: Array<ReorderItemDto>): Promise<void> {
@@ -93,6 +102,8 @@ export class ListService {
   ): Promise<void> {
     await this.listModel.deleteMany({ workspaceId: wsOid, spaceId: spaceOid });
     await this.taskService.deleteByListIds(wsOid, listIds);
+    await this.pinService.deleteByEntity(wsOid, EPinEntity.List, listIds);
+    await this.viewService.pullListIds(wsOid, listIds);
   }
 
   async deleteByWorkspaceId(wsOid: Types.ObjectId): Promise<void> {
