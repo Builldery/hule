@@ -10,6 +10,7 @@ export class List {
   spaceId: mongoose.Types.ObjectId;
 
   @Prop({ required: true }) name: string;
+  @Prop() iconName?: string;
   @Prop({ required: true, default: 0 }) order: number;
 }
 

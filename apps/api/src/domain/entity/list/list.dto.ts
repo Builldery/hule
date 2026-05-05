@@ -4,6 +4,7 @@ export class ListDto {
   @ApiProperty() id: string;
   @ApiProperty() spaceId: string;
   @ApiProperty() name: string;
+  @ApiProperty({ required: false }) iconName?: string;
   @ApiProperty() order: number;
   @ApiProperty() createdAt: string;
   @ApiProperty() updatedAt: string;
@@ -12,6 +13,7 @@ export class ListDto {
     this.id = raw?._id?.toString() ?? raw?.id?.toString();
     this.spaceId = raw?.spaceId?.toString();
     this.name = raw?.name;
+    this.iconName = raw?.iconName;
     this.order = raw?.order ?? 0;
     this.createdAt = raw?.createdAt instanceof Date ? raw.createdAt.toISOString() : raw?.createdAt;
     this.updatedAt = raw?.updatedAt instanceof Date ? raw.updatedAt.toISOString() : raw?.updatedAt;

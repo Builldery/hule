@@ -54,6 +54,7 @@ export class ListService {
       workspaceId: wsOid,
       spaceId: spaceOid,
       name: dto.name,
+      iconName: dto.iconName,
       order,
     });
     return new ListDto(created);

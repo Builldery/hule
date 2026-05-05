@@ -49,6 +49,7 @@ export class SpaceService {
       workspaceId: wsOid,
       name: dto.name,
       color: dto.color,
+      iconName: dto.iconName,
       order,
     });
     return new SpaceDto(created);
