@@ -15,6 +15,8 @@ import { RestApiTagModule } from './tag/rest-api-tag.module';
 import { RestApiCommentModule } from './comment/rest-api-comment.module';
 import { RestApiFileModule } from './file/rest-api-file.module';
 import { RestApiPinModule } from './pin/rest-api-pin.module';
+import { RestApiSpaceShareModule } from './space-share/rest-api-space-share.module';
+import { RestApiSharedSpaceModule } from './shared-space/rest-api-shared-space.module';
 import { SchedulerModule } from '../scheduler/scheduler.module';
 
 @Module({
@@ -43,6 +45,8 @@ import { SchedulerModule } from '../scheduler/scheduler.module';
     RestApiCommentModule,
     RestApiFileModule,
     RestApiPinModule,
+    RestApiSpaceShareModule,
+    RestApiSharedSpaceModule,
     SchedulerModule,
   ],
 })

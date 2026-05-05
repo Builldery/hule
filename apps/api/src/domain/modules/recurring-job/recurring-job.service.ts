@@ -28,10 +28,7 @@ import {
   localStartOfDay,
   ScheduleSpec,
 } from './schedule-clock';
-
-function toOid(id: string): Types.ObjectId {
-  return new Types.ObjectId(id);
-}
+import { toOid } from '../../entity/common/to-oid';
 
 @Injectable()
 export class RecurringJobService {

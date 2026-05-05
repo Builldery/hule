@@ -2,6 +2,7 @@ import type { IsoDateString } from './common'
 
 export interface List {
   id: string
+  workspaceId: string
   spaceId: string
   name: string
   iconName?: string

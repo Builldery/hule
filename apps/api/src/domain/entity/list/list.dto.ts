@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class ListDto {
   @ApiProperty() id: string;
+  @ApiProperty() workspaceId: string;
   @ApiProperty() spaceId: string;
   @ApiProperty() name: string;
   @ApiProperty({ required: false }) iconName?: string;
@@ -11,6 +12,7 @@ export class ListDto {
 
   constructor(raw: ListDto | any) {
     this.id = raw?._id?.toString() ?? raw?.id?.toString();
+    this.workspaceId = raw?.workspaceId?.toString();
     this.spaceId = raw?.spaceId?.toString();
     this.name = raw?.name;
     this.iconName = raw?.iconName;

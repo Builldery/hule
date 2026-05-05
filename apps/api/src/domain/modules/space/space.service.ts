@@ -14,10 +14,7 @@ import { ActionService } from '../action/action.service';
 import { PinService } from '../pin/pin.service';
 import { EPinEntity } from '../../entity/pin/pin.constants';
 import { runBulk } from '../../../adapters/mongo/dispatch-context';
-
-function toOid(id: string): Types.ObjectId {
-  return new Types.ObjectId(id);
-}
+import { toOid } from '../../entity/common/to-oid';
 
 @Injectable()
 export class SpaceService {

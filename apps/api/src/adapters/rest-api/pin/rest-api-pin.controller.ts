@@ -18,6 +18,8 @@ import { UpdatePinDto } from '../../../domain/entity/pin/update-pin.dto';
 import { IdParamsDto } from '../../../domain/entity/common/id-params.dto';
 import { ReorderItemDto } from '../../../domain/entity/common/reorder.dto';
 import { CurrentWorkspaceId } from '../decorators/current-workspace-id.decorator';
+import { CurrentUser } from '../decorators/current-user.decorator';
+import { JwtPayload } from '../../../domain/entity/auth/jwt-payload';
 
 @ApiTags('Pin')
 @ApiBearerAuth()
@@ -27,45 +29,52 @@ export class RestApiPinController {
 
   @ApiResponse({ type: [PinDto] })
   @Get()
-  getAll(@CurrentWorkspaceId() wsId: string): Promise<Array<PinDto>> {
-    return this.pinService.getAll(wsId);
+  getAll(
+    @CurrentWorkspaceId() wsId: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<Array<PinDto>> {
+    return this.pinService.getAll(wsId, user.id);
   }
 
   @ApiResponse({ type: PinDto })
   @Post()
   create(
     @CurrentWorkspaceId() wsId: string,
+    @CurrentUser() user: JwtPayload,
     @Body() dto: CreatePinDto,
   ): Promise<PinDto> {
-    return this.pinService.create(wsId, dto);
+    return this.pinService.create(wsId, user.id, dto);
   }
 
   @ApiResponse({ type: PinDto })
   @Patch(':id')
   update(
     @CurrentWorkspaceId() wsId: string,
+    @CurrentUser() user: JwtPayload,
     @Param() params: IdParamsDto,
     @Body() patch: UpdatePinDto,
   ): Promise<PinDto> {
-    return this.pinService.update(wsId, params.id, patch);
+    return this.pinService.update(wsId, user.id, params.id, patch);
   }
 
   @Delete(':id')
   @HttpCode(204)
   async delete(
     @CurrentWorkspaceId() wsId: string,
+    @CurrentUser() user: JwtPayload,
     @Param() params: IdParamsDto,
   ): Promise<void> {
-    await this.pinService.delete(wsId, params.id);
+    await this.pinService.delete(wsId, user.id, params.id);
   }
 
   @Post('reorder')
   @HttpCode(204)
   async reorder(
     @CurrentWorkspaceId() wsId: string,
+    @CurrentUser() user: JwtPayload,
     @Body(new ParseArrayPipe({ items: ReorderItemDto, whitelist: true }))
     items: Array<ReorderItemDto>,
   ): Promise<void> {
-    await this.pinService.reorder(wsId, items);
+    await this.pinService.reorder(wsId, user.id, items);
   }
 }

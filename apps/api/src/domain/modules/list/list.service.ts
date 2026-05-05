@@ -15,10 +15,7 @@ import { TaskService } from '../task/task.service';
 import { PinService } from '../pin/pin.service';
 import { EPinEntity } from '../../entity/pin/pin.constants';
 import { ViewService } from '../view/view.service';
-
-function toOid(id: string): Types.ObjectId {
-  return new Types.ObjectId(id);
-}
+import { toOid } from '../../entity/common/to-oid';
 
 @Injectable()
 export class ListService {

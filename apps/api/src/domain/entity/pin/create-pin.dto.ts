@@ -22,4 +22,13 @@ export class CreatePinDto {
 
   @ApiProperty() @IsMongoId() @IsNotEmpty()
   entityId: string;
+
+  @ApiProperty({
+    required: false,
+    description:
+      'Workspace where the entity lives. Set when pinning a shared list/space from another workspace; omit for own-workspace entities.',
+  })
+  @IsMongoId()
+  @IsOptional()
+  entityWorkspaceId?: string;
 }

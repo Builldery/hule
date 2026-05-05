@@ -23,10 +23,7 @@ import { TaskTemplatesListQueryDto } from '../../entity/task-template/task-templ
 import { EIncludeSubtasks } from '../../entity/task/tasks-list-query.dto';
 import { ETaskPriority } from '../../entity/task/task.constants';
 import { TagService } from '../tag/tag.service';
-
-function toOid(id: string): Types.ObjectId {
-  return new Types.ObjectId(id);
-}
+import { toOid } from '../../entity/common/to-oid';
 
 @Injectable()
 export class TaskTemplateService {
