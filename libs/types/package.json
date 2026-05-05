@@ -9,6 +9,7 @@
     ".": "./src/index.ts",
     "./space": "./src/space.ts",
     "./list": "./src/list.ts",
+    "./view": "./src/view.ts",
     "./task": "./src/task.ts",
     "./comment": "./src/comment.ts",
     "./common": "./src/common.ts"
