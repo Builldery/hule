@@ -7,4 +7,7 @@ export class UpdateSpaceDto {
 
   @ApiProperty({ required: false }) @IsString() @IsOptional() @MaxLength(32)
   color?: string;
+
+  @ApiProperty({ required: false }) @IsString() @IsOptional() @MaxLength(64)
+  iconName?: string;
 }

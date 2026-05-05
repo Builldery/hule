@@ -6,6 +6,7 @@ import { RestApiHealthModule } from './health/rest-api-health.module';
 import { RestApiWorkspaceModule } from './workspace/rest-api-workspace.module';
 import { RestApiSpaceModule } from './space/rest-api-space.module';
 import { RestApiListModule } from './list/rest-api-list.module';
+import { RestApiViewModule } from './view/rest-api-view.module';
 import { RestApiTaskModule } from './task/rest-api-task.module';
 import { RestApiTaskTemplateModule } from './task-template/rest-api-task-template.module';
 import { RestApiRecurringTaskModule } from './recurring-task/rest-api-recurring-task.module';
@@ -13,6 +14,9 @@ import { RestApiActionModule } from './action/rest-api-action.module';
 import { RestApiTagModule } from './tag/rest-api-tag.module';
 import { RestApiCommentModule } from './comment/rest-api-comment.module';
 import { RestApiFileModule } from './file/rest-api-file.module';
+import { RestApiPinModule } from './pin/rest-api-pin.module';
+import { RestApiSpaceShareModule } from './space-share/rest-api-space-share.module';
+import { RestApiSharedSpaceModule } from './shared-space/rest-api-shared-space.module';
 import { SchedulerModule } from '../scheduler/scheduler.module';
 
 @Module({
@@ -32,6 +36,7 @@ import { SchedulerModule } from '../scheduler/scheduler.module';
     RestApiWorkspaceModule,
     RestApiSpaceModule,
     RestApiListModule,
+    RestApiViewModule,
     RestApiTaskModule,
     RestApiTaskTemplateModule,
     RestApiRecurringTaskModule,
@@ -39,6 +44,9 @@ import { SchedulerModule } from '../scheduler/scheduler.module';
     RestApiTagModule,
     RestApiCommentModule,
     RestApiFileModule,
+    RestApiPinModule,
+    RestApiSpaceShareModule,
+    RestApiSharedSpaceModule,
     SchedulerModule,
   ],
 })

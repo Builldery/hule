@@ -14,10 +14,7 @@ import { Task } from '../../../adapters/mongo/task.schema';
 import { GridfsService } from '../../../adapters/gridfs/gridfs.service';
 import { R2Service } from '../../../adapters/r2/r2.service';
 import { CommentDto } from '../../entity/comment/comment.dto';
-
-function toOid(id: string): Types.ObjectId {
-  return new Types.ObjectId(id);
-}
+import { toOid } from '../../entity/common/to-oid';
 
 @Injectable()
 export class CommentService {

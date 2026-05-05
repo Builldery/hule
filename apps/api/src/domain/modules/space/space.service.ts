@@ -11,11 +11,10 @@ import { ListService } from '../list/list.service';
 import { TaskTemplateService } from '../task-template/task-template.service';
 import { RecurringJobService } from '../recurring-job/recurring-job.service';
 import { ActionService } from '../action/action.service';
+import { PinService } from '../pin/pin.service';
+import { EPinEntity } from '../../entity/pin/pin.constants';
 import { runBulk } from '../../../adapters/mongo/dispatch-context';
-
-function toOid(id: string): Types.ObjectId {
-  return new Types.ObjectId(id);
-}
+import { toOid } from '../../entity/common/to-oid';
 
 @Injectable()
 export class SpaceService {
@@ -27,6 +26,7 @@ export class SpaceService {
     private readonly taskTemplateService: TaskTemplateService,
     private readonly recurringJobService: RecurringJobService,
     private readonly actionService: ActionService,
+    private readonly pinService: PinService,
   ) {}
 
   async getAll(wsId: string): Promise<Array<SpaceDto>> {
@@ -46,6 +46,7 @@ export class SpaceService {
       workspaceId: wsOid,
       name: dto.name,
       color: dto.color,
+      iconName: dto.iconName,
       order,
     });
     return new SpaceDto(created);
@@ -80,6 +81,7 @@ export class SpaceService {
       await this.spaceModel.deleteOne({ _id: oid, workspaceId: wsOid });
       await this.listService.deleteBySpaceId(wsOid, oid, listIds);
       await this.taskTemplateService.deleteBySpaceId(wsOid, oid);
+      await this.pinService.deleteByEntity(wsOid, EPinEntity.Space, [oid]);
     });
   }
 

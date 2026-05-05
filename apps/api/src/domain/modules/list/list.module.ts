@@ -4,6 +4,8 @@ import { List, ListSchema } from '../../../adapters/mongo/list.schema';
 import { Space, SpaceSchema } from '../../../adapters/mongo/space.schema';
 import { ListService } from './list.service';
 import { TaskModule } from '../task/task.module';
+import { PinModule } from '../pin/pin.module';
+import { ViewModule } from '../view/view.module';
 
 @Module({
   imports: [
@@ -12,6 +14,8 @@ import { TaskModule } from '../task/task.module';
       { name: Space.name, schema: SpaceSchema },
     ]),
     TaskModule,
+    PinModule,
+    ViewModule,
   ],
   providers: [ListService],
   exports: [ListService],

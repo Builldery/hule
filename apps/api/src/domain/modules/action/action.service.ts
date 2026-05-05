@@ -11,10 +11,7 @@ import { CreateActionDto } from '../../entity/action/create-action.dto';
 import { UpdateActionDto } from '../../entity/action/update-action.dto';
 import { EActionEffectKind } from '../../entity/action/action.constants';
 import { EffectsRegistryService } from './effects/effects-registry.service';
-
-function toOid(id: string): Types.ObjectId {
-  return new Types.ObjectId(id);
-}
+import { toOid } from '../../entity/common/to-oid';
 
 function scopeToOids(
   scope?: {

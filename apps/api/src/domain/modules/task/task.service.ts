@@ -20,10 +20,7 @@ import {
 import { TimelineQueryDto } from '../../entity/task/timeline-query.dto';
 import { ETaskPriority } from '../../entity/task/task.constants';
 import { TagService } from '../tag/tag.service';
-
-function toOid(id: string): Types.ObjectId {
-  return new Types.ObjectId(id);
-}
+import { toOid } from '../../entity/common/to-oid';
 
 @Injectable()
 export class TaskService {

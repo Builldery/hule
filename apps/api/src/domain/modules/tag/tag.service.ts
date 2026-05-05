@@ -12,10 +12,7 @@ import { TagDto } from '../../entity/tag/tag.dto';
 import { CreateTagDto } from '../../entity/tag/create-tag.dto';
 import { UpdateTagDto } from '../../entity/tag/update-tag.dto';
 import { ETagColor } from '../../entity/tag/tag.constants';
-
-function toOid(id: string): Types.ObjectId {
-  return new Types.ObjectId(id);
-}
+import { toOid } from '../../entity/common/to-oid';
 
 function isDuplicateKeyError(err: unknown): boolean {
   return !!err && typeof err === 'object' && (err as { code?: number }).code === 11000;

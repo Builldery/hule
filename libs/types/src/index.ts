@@ -1,5 +1,7 @@
 export * from './common'
 export * from './space'
 export * from './list'
+export * from './view'
 export * from './task'
 export * from './comment'
+export * from './pin'
