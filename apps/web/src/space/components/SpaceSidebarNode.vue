@@ -2,8 +2,10 @@
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
+  UiAppearActions,
   UiIcon,
   UiIconButton,
+  UiListboxOption,
   UiRawInput,
   UiTreeViewItem,
 } from '@buildery/ui-kit/components'
@@ -99,6 +101,11 @@ function onAddListClick(): void {
   expanded.value = true
 }
 
+function handleSpaceMenuSelect(value: string): void {
+  if (value === 'edit') editingName.value = true
+  if (value === 'delete') void confirmDelete()
+}
+
 const listDrafts = ref<Record<string, { editing: boolean; draft: string }>>({})
 
 function startListEdit(list: List): void {
@@ -159,8 +166,7 @@ async function confirmDeleteList(list: List): Promise<void> {
       <UiIconButton
         :icon-name="isOpen ? 'NavArrowDown' : 'NavArrowRight'"
         size="small"
-        fill="outlined-tonal"
-        color="gray"
+        fill="outlined"
         class="chev-btn"
         @click.stop="toggle"
       />
@@ -189,8 +195,13 @@ async function confirmDeleteList(list: List): Promise<void> {
 
         <div class="space-actions">
           <UiIconButton size="small" fill="outlined-tonal" color="gray" class="act" title="Add list" icon-name="Plus" @click.stop="onAddListClick" />
-          <UiIconButton size="small" fill="outlined-tonal" color="gray" class="act" title="Rename space" icon-name="EditPencil" @click.stop="editingName = true" />
-          <UiIconButton size="small" fill="outlined-tonal" color="red" class="act" title="Delete space" icon-name="Trash" @click.stop="confirmDelete" />
+          <UiAppearActions @select="handleSpaceMenuSelect" @click.stop>
+            <template #trigger>
+              <UiIconButton size="small" fill="outlined-tonal" color="gray" class="act" title="More actions" icon-name="MoreHoriz" />
+            </template>
+            <UiListboxOption value="edit" label="Rename" />
+            <UiListboxOption value="delete" label="Delete" />
+          </UiAppearActions>
         </div>
       </div>
     </template>
@@ -252,6 +263,7 @@ async function confirmDeleteList(list: List): Promise<void> {
 
 <style scoped>
 .space-row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -262,12 +274,20 @@ async function confirmDeleteList(list: List): Promise<void> {
   transition: background 0.12s;
 }
 .space-row:hover { background: var(--hover); }
-.space-row:hover .space-actions { opacity: 1; }
+.space-row:hover .space-actions { opacity: 1; pointer-events: auto; }
 .space-actions {
-  margin-left: auto;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
   display: flex;
+  align-items: center;
   gap: 4px;
+  padding-left: 18px;
+  padding-right: 8px;
+  background: linear-gradient(to right, transparent 0, var(--bg) 18px);
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.12s;
 }
 .space-name {
@@ -280,6 +300,7 @@ async function confirmDeleteList(list: List): Promise<void> {
   white-space: nowrap;
 }
 .list-row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -292,12 +313,20 @@ async function confirmDeleteList(list: List): Promise<void> {
 }
 .list-row:hover { background: var(--hover); }
 .list-row.active { background: var(--active-bg); color: var(--active-text); }
-.list-row:hover .list-actions { opacity: 1; }
+.list-row:hover .list-actions { opacity: 1; pointer-events: auto; }
 .list-actions {
-  margin-left: auto;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
   display: flex;
+  align-items: center;
   gap: 4px;
+  padding-left: 18px;
+  padding-right: 10px;
+  background: linear-gradient(to right, transparent 0, var(--bg) 18px);
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.12s;
 }
 .list-name {

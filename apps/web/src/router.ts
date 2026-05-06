@@ -40,6 +40,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/task/views/TaskView.vue'),
     props: true,
   },
+  {
+    path: '/v/:viewId',
+    name: 'view',
+    component: () => import('@/view/views/ViewPage.vue'),
+    props: true,
+  },
 ]
 
 export const router = createRouter({

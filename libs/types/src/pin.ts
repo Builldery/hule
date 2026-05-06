@@ -1,6 +1,6 @@
 import type { IsoDateString } from './common'
 
-export type PinEntity = 'List' | 'Space' | 'View'
+export type PinEntity = 'list' | 'space' | 'view'
 
 export interface Pin {
   id: string

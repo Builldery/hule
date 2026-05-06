@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import {
   UiCombobox,
   UiIconButton,
+  UiInput,
   UiListboxOption,
   UiPopover,
   UiPopoverPanel,
@@ -75,8 +76,13 @@ function onComboboxValue(v: string | ReadonlyArray<string> | undefined): void {
   emits('update:value', arr)
 }
 
-function onComboboxSearch(v: string | undefined): void {
-  search.value = v ?? ''
+function onSearchInput(v: unknown): void {
+  search.value = String(v ?? '')
+  createError.value = null
+}
+
+function onComboboxClose(): void {
+  search.value = ''
   createError.value = null
 }
 
@@ -141,15 +147,23 @@ async function confirmDelete(tag: Tag): Promise<void> {
 <template>
   <UiCombobox
     multiple
-    enable-search
     :value="props.value"
     :get-display-value="getName"
     placeholder="Tags"
-   
     no-options-message="Нет тэгов. Введите имя и нажмите «+ Создать»."
     @update:value="onComboboxValue"
-    @update:search="onComboboxSearch"
+    @close="onComboboxClose"
   >
+    <div class="tt-search" @click.stop @mousedown.stop>
+      <UiInput
+        :value="search"
+        placeholder="Поиск или создание тэга"
+        autofocus
+        @update:value="onSearchInput"
+        @keydown.enter.stop="createAndPick"
+      />
+    </div>
+
     <UiListboxOption
       v-for="tag in filteredTags"
       :key="tag.id"
@@ -231,6 +245,10 @@ async function confirmDelete(tag: Tag): Promise<void> {
 </template>
 
 <style scoped>
+.tt-search {
+  padding: 8px;
+  border-bottom: 1px solid var(--ui--color__gray--300, #eee);
+}
 .tt-row {
   display: flex;
   align-items: center;

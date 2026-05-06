@@ -61,6 +61,7 @@ const isAuthLayout = computed(() => route.meta?.layout === 'auth')
         />
       </UiCard>
     </UiModal>
+
   </div>
 </template>
 

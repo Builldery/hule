@@ -2,6 +2,9 @@ import type {
   Space, List, Task, Tag, TagColor, Comment,
   CreateSpaceDto, UpdateSpaceDto, CreateListDto, UpdateListDto, ReorderItem,
 } from '@hule/types'
+import type { IViewsRepo } from '@/view/api/viewsApi'
+import type { IPinsRepo } from '@/pin/api/pinsApi'
+export type { IViewsRepo, IPinsRepo }
 
 export interface CreateTaskDto {
   listId: string
@@ -96,4 +99,6 @@ export interface Repo {
   tasks: ITasksRepo
   comments: ICommentsRepo
   tags: ITagsRepo
+  views: IViewsRepo
+  pins: IPinsRepo
 }

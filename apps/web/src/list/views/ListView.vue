@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue'
+import {
+  UiButtonGroup,
+  UiRadioButton,
+  UiRadioGroup,
+} from '@buildery/ui-kit/components'
 import { useListsStore } from '@/list/store/useListsStore'
-import { useListViewMode } from '@/list/compose/useListViewMode'
+import { parseMode, useListViewMode, type Mode } from '@/list/compose/useListViewMode'
 import TaskListMode from '@/task/components/TaskListMode.vue'
 import KanbanBoard from '@/kanban/components/KanbanBoard.vue'
 import GanttView from '@/timeline/views/GanttView.vue'
@@ -14,6 +19,12 @@ const list = computed(() => listsStore.byId[props.listId])
 
 const { mode } = useListViewMode()
 
+const modes: { label: string; value: Mode }[] = [
+  { label: 'List', value: 'list' },
+  { label: 'Kanban', value: 'kanban' },
+  { label: 'Timeline', value: 'timeline' },
+]
+
 onMounted(() => {
   void listsStore.loadForSpace(props.spaceId)
 })
@@ -24,6 +35,18 @@ watch(() => props.spaceId, (id) => {
 
 <template>
   <div v-if="list" class="list-view" :class="'mode-' + mode">
+    <div class="list-header">
+      <UiButtonGroup>
+        <UiRadioGroup :value="mode" @update:value="(v: unknown) => mode = parseMode(v)">
+          <UiRadioButton
+            v-for="m in modes"
+            :key="m.value"
+            :value="m.value"
+            :label="m.label"
+          />
+        </UiRadioGroup>
+      </UiButtonGroup>
+    </div>
     <div class="mode-body">
       <TaskListMode v-if="mode === 'list'" :list-id="props.listId" />
       <KanbanBoard v-else-if="mode === 'kanban'" :list-id="props.listId" />
@@ -41,7 +64,13 @@ watch(() => props.spaceId, (id) => {
   height: 100%;
   min-height: 0;
 }
-
+.list-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 24px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
 .mode-body {
   flex: 1;
   min-height: 0;

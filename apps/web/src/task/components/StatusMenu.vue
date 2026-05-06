@@ -4,10 +4,10 @@ export default { name: 'StatusMenu' }
 
 <script setup lang="ts">
 import {
-  UiCard,
   UiListbox,
   UiListboxOption,
   UiPopover,
+  UiPopoverCard,
   UiPopoverPanel,
   UiPopoverTrigger,
 } from '@buildery/ui-kit/components'
@@ -28,7 +28,7 @@ function onSelect(v: string | undefined): void {
       <slot :meta="statusMeta(value)" />
     </UiPopoverTrigger>
     <UiPopoverPanel>
-      <UiCard class="status-menu ui--single-card">
+      <UiPopoverCard class="status-menu">
         <UiListbox :model-value="value" @select="onSelect">
           <UiListboxOption
             v-for="o in STATUS_OPTIONS"
@@ -42,16 +42,13 @@ function onSelect(v: string | undefined): void {
             </span>
           </UiListboxOption>
         </UiListbox>
-      </UiCard>
+      </UiPopoverCard>
     </UiPopoverPanel>
   </UiPopover>
 </template>
 
 <style scoped>
 .status-menu {
-  --card-padding: 4px;
-  --card-content__gap: 0;
-  --card__border-radius: var(--ui--border-radius__medium);
   min-width: 160px;
 }
 .status-menu__row {
